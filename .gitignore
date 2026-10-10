@@ -1,0 +1,9 @@
+.env
+node_modules/
+.DS_Store
+
+# local reference only (Recraft free-tier image, not ours to use)
+docs/logo-drafts/a1-recraft.png
+
+# Puppeteer review captures (local only, 35 MB)
+temporary screenshots/
