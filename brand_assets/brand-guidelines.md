@@ -74,9 +74,7 @@ Both families are from Google Fonts and have a full Greek subset. The whole alph
 | Headings, lockup, big numbers | **Piazzolla** (serif, sturdy and sharp, engraved feel) | 600, 700 |
 | Body, UI, buttons, forms | **Commissioner** (sans, by Greek designer Kostas Bartsokas) | 400, 500, 600 |
 
-```html
-<link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@600;700&family=Commissioner:wght@400;500;600&display=swap" rel="stylesheet">
-```
+**Self-hosted, not Google Fonts** (since 2026-10-11). The files are in `assets/fonts/`: one variable woff2 per family per script (`*-greek`, `*-latin`), about 95 KB in total. All four are preloaded, and `@font-face` with `unicode-range` sits at the top of the page's `<style>`. Self-hosting is faster on phones, and it avoids sending every visitor's IP to Google (a GDPR risk in the EU). Both fonts are SIL OFL 1.1, and the licence travels inside the font files.
 
 **Scale (base 18px, ratio 1.25):**
 | Token | Size | Font / weight | Line-height | Tracking |
@@ -96,13 +94,14 @@ Both families are from Google Fonts and have a full Greek subset. The whole alph
 - Keep lines at or under 70 characters for body text.
 - Phone numbers are grouped as `213 044 4629` and always wrapped in a `tel:` link.
 
-## 4. Signature: the key edge
-Spend the visual boldness in **one** place. The bitting profile of the logo's key (three teeth of different lengths) becomes an **edge**. A section ends in the cut profile of a key blade instead of a straight line.
+## 4. Signature: the hanging key
+Spend the visual boldness in **one** place. **The logo's key, lying down, hangs from the hero's bottom edge by its bow**, in the hero's colour, right-aligned to the container.
 
-- Use it **once per page**: the bottom edge of the hero, or of the main dark section.
-- Build it as an SVG path, in the colour of the section it belongs to. It's not decorative clip art.
-- A thin brass keyway groove (3px, `--brass` at 70% opacity) runs along the blade above the cuts. That groove is what makes the profile read as a key, not a skyline.
-- Everything else stays quiet: straight edges, no other ornaments.
+- **Shape:** it's the logo's key rotated 90°: a round bow with a hole, a blade with a brass keyway groove, three rectangular teeth of different lengths (20/28/22) and a pointed tip. It's built in the same 512-grid units as `docs/logo-drafts/build-logo.mjs`, with `viewBox="72 0 288 80"`.
+- **Why the full key:** on 2026-10-11 the earlier version, which was only a cut bitting profile along the edge, read as mountains, not a key. The bow and the tip are what make it a key.
+- **Size:** `clamp(240px, 32vw, 460px)` wide. The box has the key's height and cancels it with a negative margin, so it never pushes content down. It must not touch the services heading below.
+- **Motion:** the first time it comes into view it slides in tip first with a small overshoot, like a key going into a lock. It's static under reduced motion or without JS.
+- **Frequency:** once per page. Everything else stays quiet: straight edges, no other ornaments.
 
 ## 5. Iconography
 - **Set:** [Lucide](https://lucide.dev) (MIT), outline style. Pin a version, e.g. `lucide-static@0.460.0`.
@@ -124,15 +123,19 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
 - **Active:** `transform: translateY(1px) scale(0.98)`.
 - **Focus-visible:** 2px outline with a 3px offset. Use burgundy on light backgrounds and brass-light on dark ones.
 - **Button text says what happens:** «Καλέστε 213 044 4629» and «Οδηγίες στον χάρτη». Don't use «Υποβολή», «Μάθετε περισσότερα», or arrows (→).
-- **Mobile:** a floating call bar sits at the bottom (floating layer) and is always reachable.
+- **Mobile:** a floating call bar (Καλέστε / Οδηγίες) sits at the bottom, on the floating layer.
+- **Sticky call buttons appear only after the hero:** the call bar (below 1024px) and the header phone button (1024px and up) stay hidden while the hero is on screen, because the hero already has the same two buttons. They slide in once the hero has been scrolled past, and the phone icon on the call bar rings once the first time. When the menu is open, the call bar is always shown. Without JS they stay visible.
 - **Menu button + panel (below 1280px, where the 6 nav links stop fitting):** the «Μενού» button in the header opens a panel that slides in from the right. It fills the space *between* the sticky header and the call bar, so Call / Directions stay visible and tappable, and they are never repeated inside the panel.
-  - **Contents:** the 4 section links, then a facts block at the bottom. The facts block has a live «Ανοιχτά τώρα / Κλειστά τώρα» status, a link to the full hours, and the address as plain text.
+  - **Contents:** the 6 section links, which slide in with a 40ms stagger, then a facts block: a live «Ανοιχτά τώρα / Κλειστά τώρα» status, a link to the full hours, and the address.
+  - **Only the links scroll.** The facts block is pinned right above the call bar, so the address is never hidden, even on a 640px-tall phone. The links get tighter below 760px of height.
+  - **On phones narrower than 400px**, the open menu button shows only the ✕ (its «Κλείσιμο» label stays for screen readers), so the wider label never covers the business name.
   - **Closes on:** ✕, Esc, a tap on the dimmed page, any link in the panel, or the logo.
   - While it's open, the page behind it is `inert`.
   - Above 1280px there is no panel; the header carries the nav and the phone button. The call bar exists only below 1024px, and between 1024 and 1279 the header shows the phone button plus «Μενού». Never show the phone button in the header and in the call bar at the same time.
 - **Logo:** both logos (header and footer) link to `#top`, and **no element may have `id="top"`**, so the browser scrolls to the very top. An id on the sticky header made the logo scroll only 88px.
 - **Hero numbers:** 35 χρόνια στο επάγγελμα · 2 γενιές κλειδαράδων · 4,8★ βαθμολογία στο Google · 74 κριτικές στο Google, under the hero buttons (4 across from 640px, 2×2 on phones).
-  - **Motion:** they count up from 0 the first time they are on screen. On phones they wait until they clear the call bar. The final values are in the HTML, so they show as-is without JS and under reduced motion.
+  - **Motion:** they count up from 0 as their first row comes on screen, so a «0» is never left showing. The final values are in the HTML, so they show as-is without JS and under reduced motion.
+- **Live status in the hero:** «Ανοιχτά τώρα, κλείνει στις 20:00» or «Κλειστά τώρα, ανοίγει αύριο στις 9:00», under the hero buttons, computed from the hours table and refreshed every minute. When open, the brass dot pulses three times (under 5 seconds) and then stays still. It's hidden without JS rather than showing a guess.
   - **Content:** only verifiable facts, no «1000+ πελάτες». 74 also appears in the reviews section and the JSON-LD, so update them together.
 - **Gallery** (`#douleies`, a port of the 21st.dev «Focus Cards» component, in plain HTML/CSS with real photos instead of Unsplash):
   - **From 1024px with a mouse:** hovering a photo shrinks the others to 0.98 and swaps them to a blurred copy by opacity. The original animated `filter: blur` with `transition-all`, which our rules forbid.
@@ -150,7 +153,8 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
   - **Text:** quote the reviews faithfully. A cut-off review ends with «…».
 - **Header nav:** 6 links fit only from 1280px; below that the header shows «Μενού».
 - **FAQ** (`#erotiseis`):
-  - **Markup:** native `<details>`, so it works without JS. The answer fades in, and the + rotates into ×.
+  - **Markup:** native `<details name="faq">`, so it works without JS. The answer fades in, and the + rotates into ×.
+  - **One open at a time:** opening a question closes the previous one. It's native via `name`, with a JS fallback for older browsers. The opened question then glides into view, because the answer closing above it could push it off screen.
   - **Copy:** only answers backed by known facts. Anything about prices, after-hours, areas or payment waits for the client.
   - **Call button:** the FAQ's call button shows only on desktop, because mobile has the call bar.
 - **Hours:** they appear in four places: the hours table, the footer, the JSON-LD, and Google Business Profile. The «Ανοιχτά τώρα» status is computed from the table, so change all four together. Public holidays aren't modelled.
@@ -201,6 +205,16 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
 ## 9. Motion
 - Animate only `transform` and `opacity`. Never use `transition-all`.
 - **One** orchestrated moment: the hero load sequence. No fade-up on every section.
+- **Every other motion answers the visitor or carries information, and works on phones:**
+  - the hero numbers count up
+  - the live status dot pulses
+  - the call bar slides in after the hero and its phone icon rings once
+  - the key slides into place
+  - the gallery focus follows the finger
+  - the process wipes from step to step
+  - an opened FAQ glides into view
+  - the menu links slide in
+- **What we don't use on phones:** sticky section titles like the desktop FAQ column. On a phone they cost reading space between the header and the call bar.
 - Easing:
   - press/hover: `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring), 180–240ms
   - reveals: `cubic-bezier(0.22, 1, 0.36, 1)`, 500–700ms
@@ -218,6 +232,10 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
   - Tue, Thu, Fri 9:00–20:00
   - Sat 10:00–14:30
   - Sun closed
+
+## 11. Sharing & search
+- **Link preview:** `assets/images/og-image.jpg` (1200×630) shows the hero photo, the white mark, the name, the phone and the address. It's referenced with an **absolute** URL on `https://www.kleidarasprintezis.gr/`; a relative path shows no image in Viber, Facebook or WhatsApp. It's rendered from HTML with the site's fonts, so re-render it if the name, phone or address change.
+- **Canonical:** `https://www.kleidarasprintezis.gr/`, so the `*.vercel.app` copy isn't indexed as a second site. Until the domain points at Vercel, previews of the vercel.app link show no image.
 
 ## CSS tokens
 ```css

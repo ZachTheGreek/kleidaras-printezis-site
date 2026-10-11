@@ -13,11 +13,20 @@
   <meta property="og:locale" content="el_GR">
   <meta property="og:title" content="Κλειδαράς Πρίντεζης | Θεμιστοκλέους 31, Αθήνα">
   <meta property="og:description" content="Πατέρας και γιοι κλειδαράδες στο κέντρο της Αθήνας. Τηλ. 213 044 4629.">
-  <meta property="og:image" content="assets/images/kopi-kleidion.jpg">
+  <meta property="og:url" content="https://www.kleidarasprintezis.gr/">
+  <meta property="og:image" content="https://www.kleidarasprintezis.gr/assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Κλειδαράς Πρίντεζης, Θεμιστοκλέους 31, Αθήνα, τηλ. 213 044 4629">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://www.kleidarasprintezis.gr/">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@600;700&family=Commissioner:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Fonts are self-hosted (SIL OFL 1.1): no request to Google, so the first screen paints sooner on phones -->
+  <link rel="preload" href="assets/fonts/piazzolla-greek.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/piazzolla-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/commissioner-greek.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/commissioner-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script>document.documentElement.classList.add('js');</script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -68,6 +77,12 @@
   </script>
 
   <style>
+    /* Self-hosted variable fonts (SIL OFL 1.1): one file per script covers every weight we use */
+    @font-face { font-family: "Piazzolla"; font-style: normal; font-weight: 600 700; font-display: swap; src: url(assets/fonts/piazzolla-greek.woff2) format("woff2"); unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF; }
+    @font-face { font-family: "Piazzolla"; font-style: normal; font-weight: 600 700; font-display: swap; src: url(assets/fonts/piazzolla-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: "Commissioner"; font-style: normal; font-weight: 400 600; font-display: swap; src: url(assets/fonts/commissioner-greek.woff2) format("woff2"); unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF; }
+    @font-face { font-family: "Commissioner"; font-style: normal; font-weight: 400 600; font-display: swap; src: url(assets/fonts/commissioner-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
     :root {
       --burgundy: #7A1F2B;
       --burgundy-deep: #4E1219;
@@ -171,10 +186,24 @@
     .elevated { background: var(--white); box-shadow: var(--shadow-elevated); }
     .floating { box-shadow: var(--shadow-floating); }
 
-    /* Signature: the key edge, used once */
-    .key-edge { display: flex; align-items: stretch; background: var(--nickel); }
-    .key-edge__fill { flex: 1; background: var(--burgundy-deep); }
-    .key-edge svg { display: block; width: clamp(260px, 38vw, 560px); height: auto; }
+    /* Signature: the logo's key, lying down, hanging from the hero's bottom edge by its bow.
+       The box has the key's height and cancels it with a negative margin, so it takes no space.
+       The first time it comes into view the key slides in tip first, like a key going into a lock. */
+    .key-edge {
+      --key-w: clamp(240px, 32vw, 460px); --gutter: 20px;
+      position: relative; z-index: 2; overflow: hidden; pointer-events: none;
+      margin-top: -2px; height: calc(var(--key-w) * 80 / 288); margin-bottom: calc(var(--key-w) * -80 / 288 + 2px);
+    }
+    @media (min-width: 768px) { .key-edge { --gutter: 32px; } }
+    .key-edge svg { position: absolute; top: 0; right: max(var(--gutter), calc((100% - 1200px) / 2 + var(--gutter))); display: block; width: var(--key-w); height: auto; }
+    .key-edge.will-insert svg { opacity: 0; transform: translateX(32%); }
+    .key-edge.will-insert.is-in svg { animation: key-insert 1200ms var(--ease-out) forwards; }
+    @keyframes key-insert {
+      0% { opacity: 0; transform: translateX(32%); }
+      55% { opacity: 1; transform: translateX(-2.5%); }
+      78% { transform: translateX(.8%); }
+      100% { opacity: 1; transform: none; }
+    }
 
     /* Hours: today's row */
     .hours-row[data-today="true"] { background: var(--burgundy-tint); }
@@ -197,6 +226,28 @@
     /* Mobile call bar sits on the floating layer */
     .call-bar { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     @media (max-width: 1023px) { body { padding-bottom: 88px; } }
+
+    /* Sticky call buttons (phone call bar, header phone button) appear only once the hero has been scrolled
+       past, so the first screen never shows the same two buttons twice. Without JS they simply stay visible.
+       The first time the call bar appears, its phone icon rings once. */
+    .js .call-bar { transform: translateY(110%); opacity: 0; visibility: hidden; transition: transform 380ms var(--ease-out), opacity 240ms var(--ease-out), visibility 0s linear 380ms; }
+    .js.cta-visible .call-bar, .js.menu-open .call-bar { transform: none; opacity: 1; visibility: visible; transition: transform 520ms var(--ease-out), opacity 300ms var(--ease-out), visibility 0s; }
+    .js .header-call { opacity: 0; visibility: hidden; translate: 0 -6px; transition: translate 350ms var(--ease-out), opacity 250ms var(--ease-out), visibility 0s linear 350ms, transform 200ms var(--ease-spring); }
+    .js.cta-visible .header-call { opacity: 1; visibility: visible; translate: 0 0; transition: translate 450ms var(--ease-out), opacity 300ms var(--ease-out), visibility 0s, transform 200ms var(--ease-spring); }
+    .call-bar.rang .call-ring { animation: phone-ring 1s ease-in-out 450ms 1; }
+    @keyframes phone-ring {
+      0%, 100% { transform: rotate(0); } 12% { transform: rotate(-18deg); } 26% { transform: rotate(14deg); }
+      40% { transform: rotate(-10deg); } 54% { transform: rotate(7deg); } 68% { transform: rotate(-3deg); }
+    }
+
+    /* Live "open now" line in the hero. When the shop is open the dot pulses three times (under 5 s, then still). */
+    .hero-status { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 16px; line-height: 1.4; color: rgba(238,240,239,.82); }
+    .hero-status[hidden] { display: none; }
+    .hero-status strong { font-weight: 600; color: var(--nickel); }
+    .status-dot { position: relative; flex: none; width: 9px; height: 9px; border-radius: 999px; background: rgba(238,240,239,.4); }
+    .hero-status[data-open="true"] .status-dot { background: var(--brass-light); }
+    .hero-status[data-open="true"] .status-dot::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--brass-light); animation: status-pulse 1.6s var(--ease-out) 3; }
+    @keyframes status-pulse { from { transform: scale(1); opacity: .75; } to { transform: scale(3); opacity: 0; } }
 
     /* Gallery ("Focus Cards", ported from 21st.dev). The blur is a tiny pre-blurred copy whose opacity changes,
        so only opacity and transform ever move.
@@ -389,6 +440,10 @@
     .menu-btn:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; }
     .menu-btn .icon-close, .menu-btn[aria-expanded="true"] .icon-open { display: none; }
     .menu-btn[aria-expanded="true"] .icon-close { display: block; }
+    @media (max-width: 399px) {
+      .menu-btn[aria-expanded="true"] { padding: 0 12px; }
+      .menu-btn[aria-expanded="true"] .menu-btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    }
 
     .menu-backdrop {
       position: fixed; inset: 0; z-index: 40; background: rgba(26,22,20,.45);
@@ -399,8 +454,7 @@
       position: fixed; right: 0; z-index: 45;
       top: var(--menu-top, 68px); bottom: var(--menu-bottom, 88px);
       width: min(86vw, 400px);
-      display: flex; flex-direction: column;
-      overflow-y: auto; overscroll-behavior: contain;
+      display: flex; flex-direction: column; overflow: hidden;
       background: var(--white); box-shadow: var(--shadow-floating);
       transform: translateX(100%); visibility: hidden;
       transition: transform 420ms var(--ease-out), visibility 0s linear 420ms;
@@ -410,7 +464,16 @@
     .menu-open .menu-backdrop { opacity: 1; visibility: visible; transition: opacity 300ms var(--ease-out), visibility 0s; }
     .menu-open .menu-panel { transform: none; visibility: visible; transition: transform 420ms var(--ease-out), visibility 0s; }
 
-    .menu-links { padding: 8px 24px 24px; }
+    /* Only the links scroll; the facts (open status, address) stay pinned right above the call bar */
+    .menu-panel nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+    .menu-links { padding: 8px 24px 16px; }
+    .menu-open .menu-links li { animation: menu-link-in 420ms var(--ease-out) both; }
+    .menu-open .menu-links li:nth-child(2) { animation-delay: 40ms; }
+    .menu-open .menu-links li:nth-child(3) { animation-delay: 80ms; }
+    .menu-open .menu-links li:nth-child(4) { animation-delay: 120ms; }
+    .menu-open .menu-links li:nth-child(5) { animation-delay: 160ms; }
+    .menu-open .menu-links li:nth-child(6) { animation-delay: 200ms; }
+    @keyframes menu-link-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
     .menu-link {
       display: flex; align-items: center; min-height: 60px;
       font-family: Piazzolla, Georgia, serif; font-weight: 600; font-size: 26px; letter-spacing: -0.01em; line-height: 1.2;
@@ -423,17 +486,23 @@
 
     /* Facts sit at the bottom of the panel, right above the call bar's action buttons */
     .menu-info {
-      margin-top: auto; display: grid; gap: 20px; padding: 24px;
+      flex: none; display: grid; gap: 20px; padding: 24px;
       background: var(--nickel); border-top: 1px solid var(--line);
       font-size: 16px; line-height: 1.5;
     }
     .open-status { display: block; font-weight: 600; color: var(--ink); }
     .open-status[data-open="true"] { color: var(--burgundy); }
 
+    @media (max-height: 760px) {
+      .menu-link { min-height: 50px; font-size: 23px; }
+      .menu-info { gap: 12px; padding: 16px 24px; }
+    }
     @media (min-width: 1280px) { .menu-btn, .menu-backdrop, .menu-panel { display: none; } }
     @media (prefers-reduced-motion: reduce) {
       .menu-btn, .menu-backdrop, .menu-panel, .menu-open .menu-backdrop, .menu-open .menu-panel { transition: none; }
       .menu-btn:active { transform: none; }
+      .js .call-bar, .js .header-call { transition: none; }
+      .call-bar.rang .call-ring, .hero-status[data-open="true"] .status-dot::after, .menu-open .menu-links li { animation: none; }
     }
   </style>
 </head>
@@ -466,10 +535,10 @@
 
   <!-- Header. No id="top" here on purpose: with no such element, href="#top" scrolls to the very top of the page (HTML spec). An id on this sticky header made the logo scroll only 88px. -->
   <header class="site-header sticky top-0 z-50">
-    <div class="relative mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-5 py-3 md:px-8">
-      <a href="#top" class="brand-link flex items-center gap-3 no-underline" aria-label="Κλειδαράς Πρίντεζης, αρχή σελίδας">
+    <div class="relative mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-5 py-3 sm:gap-6 md:px-8">
+      <a href="#top" class="brand-link flex items-center gap-2.5 no-underline sm:gap-3" aria-label="Κλειδαράς Πρίντεζης, αρχή σελίδας">
         <img src="brand_assets/logo-mark.svg" alt="" width="30" height="38" class="h-[38px] w-auto">
-        <span class="font-display text-[22px] font-semibold leading-none tracking-[-0.02em] text-ink">Κλειδαράς Πρίντεζης</span>
+        <span class="whitespace-nowrap font-display text-[length:clamp(17px,5vw,22px)] font-semibold leading-none tracking-[-0.02em] text-ink">Κλειδαράς Πρίντεζης</span>
       </a>
       <nav class="hidden items-center gap-7 xl:flex" aria-label="Κύριο μενού">
         <a class="nav-link" href="#ypiresies">Υπηρεσίες</a>
@@ -480,7 +549,7 @@
         <a class="nav-link" href="#epikoinonia">Επικοινωνία</a>
       </nav>
       <!-- Below 1024px the call bar carries the phone button, so the header carries the menu instead -->
-      <a href="tel:+302130444629" class="btn btn-primary hidden lg:inline-flex" style="min-height:46px;padding:0 20px;font-size:16px">
+      <a href="tel:+302130444629" class="header-call btn btn-primary hidden lg:inline-flex" style="min-height:46px;padding:0 20px;font-size:16px">
         <svg class="icon-sm" aria-hidden="true"><use href="#i-phone"/></svg>213 044 4629
       </a>
       <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mobile-menu">
@@ -541,6 +610,7 @@
               <svg class="icon-sm" aria-hidden="true"><use href="#i-map-pin"/></svg>Οδηγίες στον χάρτη
             </a>
           </div>
+          <p class="hero-status rise d4" data-open-wrap hidden><span class="status-dot" aria-hidden="true"></span><span><strong data-open-status></strong><span data-open-detail-inline></span></span></p>
           <!-- Numbers count up from 0 the first time they are on screen. Only verifiable facts: 74 is also in the reviews and the JSON-LD. -->
           <ul class="hero-stats rise d5" role="list">
             <li class="hero-stat"><span class="hero-stat-num"><span data-count="35" aria-hidden="true">35</span></span><span class="hero-stat-label"><span class="sr-only">35 </span>χρόνια στο επάγγελμα</span></li>
@@ -555,10 +625,10 @@
       </div>
     </section>
     <div class="key-edge" aria-hidden="true">
-      <div class="key-edge__fill"></div>
-      <svg viewBox="0 0 376 64" preserveAspectRatio="xMaxYMin meet">
-        <path fill="#4E1219" d="M0 0H376V28L312 64L291 46H281L260 64L239 30H229L208 64L187 40H177L156 64L135 52H125L104 64L83 34H73L52 64L31 48H21L0 64H0Z"/>
-        <path d="M14 13H318" stroke="#B8893B" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+      <svg viewBox="72 0 288 80">
+        <path fill="#4E1219" d="M250 10H96L82 24L96 38H108V60H124V38H134V66H150V38H160V58H176V38H250Z"/>
+        <path fill="#4E1219" fill-rule="evenodd" d="M354 24a54 54 0 1 1-108 0a54 54 0 1 1 108 0ZM318 24a18 18 0 1 0-36 0a18 18 0 1 0 36 0Z"/>
+        <path d="M104 24H240" stroke="#B8893B" stroke-width="2" stroke-linecap="round" opacity=".75"/>
       </svg>
     </div>
 
@@ -812,35 +882,35 @@
         </div>
         <div class="lg:col-span-8">
           <div class="faq divide-y divide-line border-y border-line">
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Κλειδώθηκα έξω από το σπίτι. Τι κάνω;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Πάρτε μας τηλέφωνο στο <a class="link" href="tel:+302130444629">213 044 4629</a> και πείτε μας πού βρίσκεστε. Πριν ανοίξουμε την πόρτα θα σας ζητήσουμε ταυτότητα ή κάποιο έγγραφο που δείχνει ότι μένετε εκεί. Το κάνουμε για τη δική σας ασφάλεια.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Μετακόμισα ή έχασα τα κλειδιά μου. Πρέπει να αλλάξω κλειδαριά;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Συνήθως όχι. Αν η πόρτα έχει κύλινδρο, δηλαδή τον «αφαλό» όπου μπαίνει το κλειδί, αλλάζουμε μόνο αυτόν και τα παλιά κλειδιά δεν ανοίγουν πια. Αν η κλειδαριά είναι παλιού τύπου, με το μακρύ κλειδί που λέγεται «πρόκα», μπορεί να μετατραπεί σε κύλινδρο.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Μπορώ να βγάλω αντίγραφο από κλειδί ασφαλείας;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Ναι. Για πολλά κλειδιά ασφαλείας χρειάζεται και η κάρτα που πήρατε μαζί με την κλειδαριά, γιατί χωρίς αυτήν το αντίγραφο δεν βγαίνει. Φέρτε στο μαγαζί το κλειδί και την κάρτα.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Τι είναι η μετατροπή θωρακισμένης πόρτας;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Πολλές θωρακισμένες πόρτες έχουν ακόμα κλειδαριά με πρόκα. Με τη μετατροπή βάζουμε στην ίδια πόρτα κλειδαριά με κύλινδρο ασφαλείας, χωρίς να χρειαστεί να αλλάξετε την πόρτα.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Έρχεστε εσείς ή πρέπει να έρθω στο μαγαζί;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Εξαρτάται από τη δουλειά. Αντίγραφα κλειδιών και αγορές γίνονται στο μαγαζί. Για ανοίγματα, αλλαγές κλειδαριάς, θωρακισμένες πόρτες, συναγερμούς και τοποθετήσεις ερχόμαστε εμείς σε εσάς.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Φτιάχνετε κλειδιά αυτοκινήτου και μηχανής;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Ναι. Κλειδιά, τηλεκοντρόλ, immobilizer και επισκευές σε κλειδιά που χάλασαν, για αυτοκίνητα και μηχανές. Πείτε μας στο τηλέφωνο μάρκα, μοντέλο και χρονιά, για να σας πούμε τι χρειάζεται.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Τι μπορώ να αγοράσω από το μαγαζί;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Κλειδαριές, κυλίνδρους, λουκέτα και πόμολα. Αν δεν ξέρετε τι ταιριάζει στην πόρτα σας, φέρτε μια φωτογραφία της ή τον παλιό κύλινδρο και θα σας δείξουμε.</p></div>
             </details>
-            <details class="faq-item">
+            <details class="faq-item" name="faq">
               <summary><span>Πού ακριβώς είναι το μαγαζί;</span><span class="faq-icon" aria-hidden="true"><svg class="icon-sm"><use href="#i-plus"/></svg></span></summary>
               <div class="faq-body"><p>Στη Θεμιστοκλέους 31, κοντά στην πλατεία Κάνιγγος, λίγα λεπτά με τα πόδια από τους σταθμούς του μετρό Ομόνοια και Πανεπιστήμιο. <a class="link" href="https://www.google.com/maps/dir/?api=1&amp;destination=%CE%9A%CE%9B%CE%95%CE%99%CE%94%CE%91%CE%A1%CE%91%CE%A3%20%CE%A0%CE%A1%CE%99%CE%9D%CE%A4%CE%95%CE%96%CE%97%CE%A3%20%CE%94%CE%97%CE%9C%CE%97%CE%A4%CE%A1%CE%99%CE%9F%CE%A3%2C%20%CE%98%CE%B5%CE%BC%CE%B9%CF%83%CF%84%CE%BF%CE%BA%CE%BB%CE%AD%CE%BF%CF%85%CF%82%2031%2C%20%CE%91%CE%B8%CE%AE%CE%BD%CE%B1" target="_blank" rel="noopener">Οδηγίες στον χάρτη</a></p></div>
             </details>
@@ -943,7 +1013,7 @@
   <div class="call-bar fixed inset-x-0 bottom-0 z-50 bg-white/95 px-4 pt-3 backdrop-blur floating lg:hidden">
     <div class="mx-auto flex max-w-[600px] gap-3">
       <a href="tel:+302130444629" class="btn btn-primary flex-1">
-        <svg class="icon-sm" aria-hidden="true"><use href="#i-phone"/></svg>Καλέστε
+        <svg class="icon-sm call-ring" aria-hidden="true"><use href="#i-phone"/></svg>Καλέστε
       </a>
       <a href="https://www.google.com/maps/dir/?api=1&amp;destination=%CE%9A%CE%9B%CE%95%CE%99%CE%94%CE%91%CE%A1%CE%91%CE%A3%20%CE%A0%CE%A1%CE%99%CE%9D%CE%A4%CE%95%CE%96%CE%97%CE%A3%20%CE%94%CE%97%CE%9C%CE%97%CE%A4%CE%A1%CE%99%CE%9F%CE%A3%2C%20%CE%98%CE%B5%CE%BC%CE%B9%CF%83%CF%84%CE%BF%CE%BA%CE%BB%CE%AD%CE%BF%CF%85%CF%82%2031%2C%20%CE%91%CE%B8%CE%AE%CE%BD%CE%B1" target="_blank" rel="noopener" class="btn btn-secondary flex-1">
         <svg class="icon-sm" aria-hidden="true"><use href="#i-map-pin"/></svg>Οδηγίες
@@ -997,9 +1067,12 @@
         if (!s) return;
         document.querySelectorAll('[data-open-status]').forEach((el) => { el.textContent = s.label; el.dataset.open = String(s.open); });
         document.querySelectorAll('[data-open-detail]').forEach((el) => { el.textContent = s.detail; });
+        document.querySelectorAll('[data-open-detail-inline]').forEach((el) => { el.textContent = ', ' + s.detail.charAt(0).toLowerCase() + s.detail.slice(1); });
+        document.querySelectorAll('[data-open-wrap]').forEach((el) => { el.dataset.open = String(s.open); el.hidden = false; });
       } catch (e) {}
     };
     renderOpenStatus();
+    setInterval(renderOpenStatus, 60000);
 
     // Mobile menu: opens between the header and the call bar; the page behind it is made inert
     const menuBtn = document.querySelector('.menu-btn');
@@ -1246,8 +1319,49 @@
             requestAnimationFrame(step);
           }, wait + i * 130);
         });
-      }, { threshold: 0.6, rootMargin: '0px 0px -90px 0px' });
+      }, { threshold: 0, rootMargin: '0px 0px -40px 0px' }); // start as the first row comes on screen
       io.observe(stats);
+    });
+
+    // Sticky call buttons appear once the hero has been scrolled past (see CSS); the phone icon rings once
+    (() => {
+      const hero = document.querySelector('main > section');
+      const bar = document.querySelector('.call-bar');
+      const root = document.documentElement;
+      if (!hero || !('IntersectionObserver' in window)) { root.classList.add('cta-visible'); return; }
+      let rang = false;
+      new IntersectionObserver(([entry]) => {
+        const passed = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        root.classList.toggle('cta-visible', passed);
+        if (passed && !rang && !reduceMotion) { rang = true; bar.classList.add('rang'); }
+      }, { rootMargin: '-72px 0px 0px 0px' }).observe(hero);
+    })();
+
+    // FAQ: one answer open at a time (native <details name="faq">, with this as the fallback for older
+    // browsers). The opened question then glides into view, since the answer closing above it can push it away.
+    const faqItems = [...document.querySelectorAll('.faq-item')];
+    faqItems.forEach((item) => item.addEventListener('toggle', () => {
+      if (!item.open) return;
+      faqItems.forEach((other) => { if (other !== item && other.open) other.open = false; });
+      requestAnimationFrame(() => {
+        const box = item.getBoundingClientRect();
+        const top = header.getBoundingClientRect().bottom + 12;
+        const bar = document.querySelector('.call-bar');
+        const bottom = window.innerHeight - (bar && getComputedStyle(bar).visibility === 'visible' ? bar.offsetHeight : 0);
+        if (box.top < top || box.bottom > bottom) window.scrollBy({ top: box.top - top, behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    }));
+
+    // The key at the bottom of the hero slides in, tip first, the first time it comes into view
+    document.querySelectorAll('.key-edge').forEach((edge) => {
+      if (reduceMotion || !('IntersectionObserver' in window)) return;
+      edge.classList.add('will-insert');
+      const io = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        edge.classList.add('is-in');
+        io.disconnect();
+      }, { threshold: 0.6 });
+      io.observe(edge.querySelector('svg'));
     });
   </script>
 </body>
