@@ -229,8 +229,9 @@
 
     /* Sticky call buttons (phone call bar, header phone button) appear only once the hero has been scrolled
        past, so the first screen never shows the same two buttons twice. Without JS they simply stay visible.
-       The first time the call bar appears, its phone icon rings once. */
-    .js .call-bar { transform: translateY(110%); opacity: 0; visibility: hidden; transition: transform 380ms var(--ease-out), opacity 240ms var(--ease-out), visibility 0s linear 380ms; }
+       The first time the call bar appears, its phone icon rings once. The call bar also slides away while the
+       door process is under it (.cta-yield), so it never covers the step titles; an open menu still shows it. */
+    .js .call-bar, .js.cta-visible.cta-yield:not(.menu-open) .call-bar { transform: translateY(110%); opacity: 0; visibility: hidden; transition: transform 380ms var(--ease-out), opacity 240ms var(--ease-out), visibility 0s linear 380ms; }
     .js.cta-visible .call-bar, .js.menu-open .call-bar { transform: none; opacity: 1; visibility: visible; transition: transform 520ms var(--ease-out), opacity 300ms var(--ease-out), visibility 0s; }
     .js .header-call { opacity: 0; visibility: hidden; translate: 0 -6px; transition: translate 350ms var(--ease-out), opacity 250ms var(--ease-out), visibility 0s linear 350ms, transform 200ms var(--ease-spring); }
     .js.cta-visible .header-call { opacity: 1; visibility: visible; translate: 0 0; transition: translate 450ms var(--ease-out), opacity 300ms var(--ease-out), visibility 0s, transform 200ms var(--ease-spring); }
@@ -501,7 +502,7 @@
     @media (prefers-reduced-motion: reduce) {
       .menu-btn, .menu-backdrop, .menu-panel, .menu-open .menu-backdrop, .menu-open .menu-panel { transition: none; }
       .menu-btn:active { transform: none; }
-      .js .call-bar, .js .header-call { transition: none; }
+      .js .call-bar, .js .header-call { transition: none !important; } /* the shown/hidden state rules above are more specific */
       .call-bar.rang .call-ring, .hero-status[data-open="true"] .status-dot::after, .menu-open .menu-links li { animation: none; }
     }
   </style>
@@ -1335,6 +1336,12 @@
         root.classList.toggle('cta-visible', passed);
         if (passed && !rang && !reduceMotion) { rang = true; bar.classList.add('rang'); }
       }, { rootMargin: '-72px 0px 0px 0px' }).observe(hero);
+      // The call bar steps aside while the door process is under it, so it never covers the step titles.
+      // The observer watches only the strip at the bottom of the screen where the bar sits.
+      const steps = document.querySelector('.steps');
+      const strip = Math.ceil(bar.offsetHeight / window.innerHeight * 100) + 2;
+      if (steps) new IntersectionObserver(([entry]) => root.classList.toggle('cta-yield', entry.isIntersecting),
+        { rootMargin: `-${100 - strip}% 0px 0px 0px` }).observe(steps);
     })();
 
     // FAQ: one answer open at a time (native <details name="faq">, with this as the fallback for older
