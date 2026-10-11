@@ -253,14 +253,16 @@
     /* Gallery ("Focus Cards", ported from 21st.dev). The blur is a tiny pre-blurred copy whose opacity changes,
        so only opacity and transform ever move.
        From 1024px with a mouse: hovering a photo blurs and shrinks the others.
-       Below 1024px: a swipeable strip. The photo in the middle is sharp; its neighbours blur and shrink in step
-       with the finger, and tapping a blurred photo brings it to the middle. */
+       Below 1024px: a swipeable strip with no end. The photo in the middle is sharp; its neighbours blur and shrink
+       in step with the finger, and tapping a blurred photo brings it to the middle. The copies that close the loop
+       ([data-clone], added by the script) never show in the desktop grid. */
     .focus-card { aspect-ratio: 4 / 5; }
     .focus-card .focus-blur { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; }
     .focus-card figcaption { left: 16px; right: 16px; bottom: 14px; font-size: 16px; }
     .focus-dots { display: none; }
     @media (min-width: 1024px) {
       .focus-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+      .focus-card[data-clone] { display: none; }
       .focus-card { transition: transform 360ms var(--ease-out); }
       .focus-card .focus-sharp { transition: transform 700ms var(--ease-out); }
       .focus-card .focus-blur { transition: opacity 360ms var(--ease-out); }
@@ -725,7 +727,8 @@
     </section>
 
     <!-- Gallery: port of the 21st.dev "Focus Cards" component. Desktop: hovering a photo blurs the others.
-         Phones and tablets: a swipeable strip where the photo in the middle is in focus. Captions always show. -->
+         Phones and tablets: a swipeable strip where the photo in the middle is in focus, with no end: after the last
+         photo comes the first again. Captions always show. -->
     <section id="douleies" class="bg-nickel-2 py-24 md:py-32" aria-labelledby="douleies-title">
       <div class="mx-auto max-w-[1200px] px-5 md:px-8">
         <div class="max-w-[720px]">
@@ -775,29 +778,29 @@
         <div class="steps" data-interval="3500">
           <div class="steps-head">
             <h2 id="diadikasia-title" class="t-h2">Μια πόρτα, βήμα βήμα</h2>
-            <p class="t-lead measure mt-5 text-nickel/80">Αλλάξαμε την κλειδαριά σε μια ξύλινη πόρτα και της βάλαμε μηχανισμό επαναφοράς. Δείτε όλη τη δουλειά, από την αρχή ως το τέλος.</p>
+            <p class="t-lead measure mt-5 text-nickel/80">Αλλάξαμε την κλειδαριά σε μια ξύλινη πόρτα. Δείτε όλη τη δουλειά, από την αρχή ως το τέλος.</p>
           </div>
           <div class="steps-list" role="tablist" aria-orientation="vertical" aria-label="Τα βήματα της δουλειάς">
-            <button type="button" class="step-row" role="tab" id="step-tab-1" aria-selected="true" aria-controls="steps-panel" tabindex="0" data-caption="Η ξύλινη πόρτα με την παλιά της κλειδαριά."><span class="step-num" aria-hidden="true">01</span><span class="step-title">Η πόρτα πριν</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-2" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξεβιδώνουμε την παλιά κλειδαριά και τη βγάζουμε από την πόρτα."><span class="step-num" aria-hidden="true">02</span><span class="step-title">Βγάζουμε την παλιά κλειδαριά</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-3" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Βγάζουμε την πόρτα από τους μεντεσέδες και τη δουλεύουμε στο πάτωμα."><span class="step-num" aria-hidden="true">03</span><span class="step-title">Κατεβάζουμε την πόρτα</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-4" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Μετράμε και σημαδεύουμε τη νέα κλειδαριά πολλαπλών σημείων."><span class="step-num" aria-hidden="true">04</span><span class="step-title">Μετράμε τη νέα κλειδαριά</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-5" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η καινούργια κλειδαριά μπαίνει στο πλάι της πόρτας."><span class="step-num" aria-hidden="true">05</span><span class="step-title">Η νέα κλειδαριά στη θέση της</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-6" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξανακρεμάμε την πόρτα και βιδώνουμε τα εξαρτήματα της κλειδαριάς."><span class="step-num" aria-hidden="true">06</span><span class="step-title">Ξανά στη θέση της</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-7" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Βάζουμε μηχανισμό επαναφοράς, για να κλείνει η πόρτα μόνη της."><span class="step-num" aria-hidden="true">07</span><span class="step-title">Μηχανισμός επαναφοράς</span></button>
-            <button type="button" class="step-row" role="tab" id="step-tab-8" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η πόρτα κλειδώνει σε πολλά σημεία και κλείνει μόνη της."><span class="step-num" aria-hidden="true">08</span><span class="step-title">Έτοιμη</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-1" aria-selected="true" aria-controls="steps-panel" tabindex="0" data-caption="Ξεβιδώνουμε την παλιά κλειδαριά και τη βγάζουμε από την πόρτα."><span class="step-num" aria-hidden="true">01</span><span class="step-title">Βγάζουμε την παλιά κλειδαριά</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-2" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Βγάζουμε την πόρτα από τους μεντεσέδες και τη δουλεύουμε στο πάτωμα."><span class="step-num" aria-hidden="true">02</span><span class="step-title">Κατεβάζουμε την πόρτα</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-3" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Μετράμε και σημαδεύουμε τη νέα κλειδαριά πολλαπλών σημείων."><span class="step-num" aria-hidden="true">03</span><span class="step-title">Μετράμε τη νέα κλειδαριά</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-4" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η καινούργια κλειδαριά μπαίνει στο πλάι της πόρτας."><span class="step-num" aria-hidden="true">04</span><span class="step-title">Η νέα κλειδαριά στη θέση της</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-5" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξανακρεμάμε την πόρτα και βιδώνουμε τα εξαρτήματα της κλειδαριάς."><span class="step-num" aria-hidden="true">05</span><span class="step-title">Ξανά στη θέση της</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-6" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξαναβάζουμε τον μηχανισμό επαναφοράς, για να κλείνει πάλι μόνη της."><span class="step-num" aria-hidden="true">06</span><span class="step-title">Ξαναβάζουμε τον μηχανισμό</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-7" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η νέα κλειδαριά πιάνει όλο το πλάι της πόρτας και κλειδώνει σε πολλά σημεία."><span class="step-num" aria-hidden="true">07</span><span class="step-title">Κλειδώνει σε πολλά σημεία</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-8" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η πόρτα έτοιμη και κλειστή, με την καινούργια κλειδαριά."><span class="step-num" aria-hidden="true">08</span><span class="step-title">Έτοιμη</span></button>
           </div>
           <div class="steps-pane" id="steps-panel" role="tabpanel" aria-labelledby="step-tab-1">
-            <div class="step-slide" data-l="on"><img src="assets/images/diadikasia-1-prin.jpg" alt="Ξύλινη πόρτα με παλιά κλειδαριά και ορειχάλκινη λαβή" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
-            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-2-palia-kleidaria.jpg" alt="Ο γιος βγάζει την παλιά κλειδαριά από το πλάι της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="on"><img src="assets/images/diadikasia-2-palia-kleidaria.jpg" alt="Ο γιος βγάζει την παλιά κλειδαριά από το πλάι της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-3-katebasma.jpg" alt="Η ξύλινη πόρτα ξαπλωμένη στο πάτωμα, με τα εργαλεία γύρω της" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-4-metrima.jpg" alt="Χέρια σημαδεύουν με μαρκαδόρο τη μακριά ορειχάλκινη κλειδαριά" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-5-nea-kleidaria.jpg" alt="Η νέα κλειδαριά πολλαπλών σημείων τοποθετημένη στο πλάι της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-6-kylindros.jpg" alt="Ο γιος βιδώνει τα εξαρτήματα της κλειδαριάς δίπλα στο πόμολο" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-7-mixanismos.jpg" alt="Ο γιος ρυθμίζει τον μηχανισμό επαναφοράς στο πάνω μέρος της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
-            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-8-etoimi.jpg" alt="Η ξύλινη πόρτα έτοιμη, με τη νέα κλειδαριά και τον μηχανισμό επαναφοράς" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-8-etoimi.jpg" alt="Η πόρτα ανοιχτή: η νέα κλειδαριά σε όλο το πλάι της και ο μηχανισμός επαναφοράς από πάνω" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-9-kleisti.jpg" alt="Η ξύλινη πόρτα κλειστή, με ορειχάλκινη λαβή, μετά την αλλαγή της κλειδαριάς" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
             <div class="steps-bars" aria-hidden="true"><span class="steps-bar" data-s="now"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span></div>
-            <p class="steps-caption"><span class="steps-count">Βήμα 1 από 8</span><span class="steps-caption-text">Η ξύλινη πόρτα με την παλιά της κλειδαριά.</span></p>
+            <p class="steps-caption"><span class="steps-count">Βήμα 1 από 8</span><span class="steps-caption-text">Ξεβιδώνουμε την παλιά κλειδαριά και τη βγάζουμε από την πόρτα.</span></p>
             <button type="button" class="video-toggle steps-toggle" data-state="paused" aria-label="Αυτόματη προβολή των βημάτων">
               <svg class="icon-sm icon-play" aria-hidden="true"><use href="#i-play"/></svg>
               <svg class="icon-sm icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
@@ -1127,23 +1130,37 @@
       }
     });
 
-    // Gallery on phones and tablets: a swipeable strip. The photo in the middle is sharp and its neighbours blur
-    // and shrink in step with the finger; tapping a blurred photo brings it to the middle; the dots show where you are.
+    // Gallery on phones and tablets: a swipeable strip with no end. The photo in the middle is sharp and its
+    // neighbours blur and shrink in step with the finger; tapping a blurred photo brings it to the middle; the dots
+    // show where you are. Copies of the last two photos sit before the first and of the first two after the last,
+    // so the first photo has the last one beside it and the last has the first. Once the strip comes to rest on a
+    // copy, it jumps to the real photo, which looks exactly the same.
     document.querySelectorAll('.focus-grid').forEach((strip) => {
+      const real = [...strip.querySelectorAll('.focus-card')];
+      real.forEach((card, i) => { card.dataset.real = i; });
+      const copy = (card) => {
+        const twin = card.cloneNode(true);
+        twin.dataset.clone = '';
+        twin.setAttribute('aria-hidden', 'true');
+        return twin;
+      };
+      strip.prepend(...real.slice(-2).map(copy));
+      strip.append(...real.slice(0, 2).map(copy));
       const cards = [...strip.querySelectorAll('.focus-card')];
       const dotsBox = strip.parentElement.querySelector('.focus-dots');
       const mq = window.matchMedia('(max-width: 1023px)');
-      let current = -1, frame = 0;
-      const centre = (i) => {
+      let current = -1, frame = 0, rest = 0, touching = false;
+      const centre = (i, behavior = reduceMotion ? 'auto' : 'smooth') => {
         const card = cards[i];
-        strip.scrollTo({ left: card.offsetLeft - (strip.clientWidth - card.offsetWidth) / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
+        strip.scrollTo({ left: card.offsetLeft - (strip.clientWidth - card.offsetWidth) / 2, behavior });
       };
-      const dots = cards.map((card, i) => {
+      const realIndex = () => (current < 0 ? 0 : +cards[current].dataset.real);
+      const dots = real.map((card, i) => {
         const dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'focus-dot';
-        dot.setAttribute('aria-label', `Φωτογραφία ${i + 1} από ${cards.length}: ${card.querySelector('figcaption').textContent}`);
-        dot.addEventListener('click', () => centre(i));
+        dot.setAttribute('aria-label', `Φωτογραφία ${i + 1} από ${real.length}: ${card.querySelector('figcaption').textContent}`);
+        dot.addEventListener('click', () => centre(cards.indexOf(card)));
         dotsBox.append(dot);
         return dot;
       });
@@ -1161,17 +1178,32 @@
         });
         if (best !== current) {
           current = best;
-          dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === best)));
+          dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === realIndex())));
         }
       };
       const queue = () => { if (!frame) frame = requestAnimationFrame(update); };
-      strip.addEventListener('scroll', queue, { passive: true });
+      // At rest on a copy, jump to the real photo. Never while a finger is on the strip, so no swipe is cut short.
+      const settle = () => {
+        rest = 0;
+        if (!mq.matches || touching) return;
+        update();
+        const card = cards[current];
+        if (!('clone' in card.dataset)) return;
+        strip.scrollLeft += real[card.dataset.real].offsetLeft - card.offsetLeft;
+        update();
+      };
+      const settleSoon = () => { clearTimeout(rest); rest = setTimeout(settle, 150); };
+      strip.addEventListener('scroll', () => { queue(); settleSoon(); }, { passive: true });
+      strip.addEventListener('scrollend', settle);
+      strip.addEventListener('touchstart', () => { touching = true; }, { passive: true });
+      ['touchend', 'touchcancel'].forEach((type) => strip.addEventListener(type, () => { touching = false; settleSoon(); }, { passive: true }));
       window.addEventListener('resize', queue);
       cards.forEach((card, i) => card.addEventListener('click', () => { if (mq.matches && i !== current) centre(i); }));
       const setMode = () => {
         if (mq.matches) {
           strip.setAttribute('role', 'region');
           strip.tabIndex = 0;
+          centre(cards.indexOf(real[realIndex()]), 'auto'); // start on a real photo, the first one on page load
           queue();
         } else {
           strip.removeAttribute('role');
@@ -1181,6 +1213,8 @@
       };
       mq.addEventListener('change', setMode);
       setMode();
+      // Late styles (the Tailwind CDN) can still shift the strip, so line it up once more when the page has loaded
+      window.addEventListener('load', () => { if (mq.matches && !touching) centre(cards.indexOf(real[realIndex()]), 'auto'); }, { once: true });
     });
 
     // Process: one job step by step (port of the 21st.dev "Index List Carousel").

@@ -140,6 +140,7 @@ Spend the visual boldness in **one** place. **The logo's key, lying down, hangs 
 - **Gallery** (`#douleies`, a port of the 21st.dev «Focus Cards» component, in plain HTML/CSS with real photos instead of Unsplash):
   - **From 1024px with a mouse:** hovering a photo shrinks the others to 0.98 and swaps them to a blurred copy by opacity. The original animated `filter: blur` with `transition-all`, which our rules forbid.
   - **Below 1024px:** a swipeable strip, one photo in the middle (76vw on phones, 44vw on tablets). The neighbours blur and shrink in step with the finger (`--d` set from the scroll position). Tapping a blurred photo brings it to the middle, and dots under the strip show the position and jump to a photo.
+  - **No end (2026-10-11):** the last photo shows the first one blurred on its right, and the first shows the last on its left, so swiping on wraps around. The script adds two copies at each end (`data-clone`, `aria-hidden`, hidden in the desktop grid). Once the strip rests on a copy, it jumps to the real photo, which looks the same. It never jumps while a finger is on the strip.
   - **Blurred copies:** tiny pre-blurred 180×240 JPEGs in `assets/images/blur/` (2–3 KB each). There's no CSS filter at runtime.
   - **Captions:** always visible. Keep them to 2–3 words; the full description goes in `alt`.
 - **Process** (`#diadikasia`, a port of the 21st.dev «Index List Carousel»): one real job, a wooden door, in 8 steps. The top step is the start and the bottom step is the finished door.
@@ -147,7 +148,7 @@ Spend the visual boldness in **one** place. **The logo's key, lying down, hangs 
   - **Picking a step:** mouse hover, click, or arrow keys/Home/End. On touch, tap the right two thirds of the photo for the next step and the left third for the previous, or swipe sideways. Vertical swipes still scroll the page.
   - **Motion:** the new photo wipes in from the right going down the list and from the left going back up. It's a mask of two opposite `translate`s, so only transform and opacity animate.
   - **Autoplay:** it plays through once, 3.5s per step, the first time it is half on screen, and stops on the finished door. The story bars on top are the clock (a CSS animation). It holds while the mouse or keyboard is on the list, a deliberate pick stops it, and the button pauses or restarts it (WCAG 2.2.2). It never starts by itself under reduced motion.
-  - **Privacy:** the client's door sign is blurred in steps 6 and 8. Blur any client name, sign or address before adding a photo.
+  - **Privacy:** the client's door sign is blurred in steps 5 and 7. Blur any client name, sign or address before adding a photo.
 - **Reviews** (`#kritikes`): laid out like Google Maps: a rating summary (4,8 ★★★★★ · 74 κριτικές), then white review cards with an initial avatar, name, «Κριτική στο Google», 5 stars and the text.
   - **Stars:** only show 5 stars on a review that is 5/5 on Google. Both current ones were checked on 2026-10-10. The summary shows 5 full stars for 4,8, as Google does.
   - **Text:** quote the reviews faithfully. A cut-off review ends with «…».
@@ -192,7 +193,7 @@ Spend the visual boldness in **one** place. **The logo's key, lying down, hangs 
   | Family | `oikogeneia-toixos-kleidia.jpg` + `topothetisi-kleidarias.jpg` | together they show all three people |
   | Shop | `magazi-prosopsi.jpg` + `magazi-toixos-kleidion.jpg` | entrance + key wall; the key wall is hidden below 640px (it is already in the family photo) |
   | Gallery «Από τη δουλειά μας» (6) | `douleia-*.jpg` (900×1200) | gate, electronic lock, new cylinder, remote repair, gate electric lock, wooden-door lock: 3 with people, 3 objects |
-  | Process «Μια πόρτα, βήμα βήμα» (8) | `diadikasia-1…8-*.jpg` (900×1200) | photos #17, #37, #10, #26, #45, #51, #42, #21 of one wooden-door job |
+  | Process «Μια πόρτα, βήμα βήμα» (8) | `diadikasia-2…9-*.jpg` (900×1200) | photos #37, #10, #26, #45, #51, #42, #21, #17 of one wooden-door job. There is no «before» photo: #17 (now `diadikasia-9-kleisti.jpg`) was step 1 «Η πόρτα πριν» until 2026-10-11, but it shows the finished door, so it's the last step. The door closer was put back, not new (step 6) |
 
 ### Video
 - At most **one** looping video per page. It's muted with **no audio track** in the file, has a poster frame and `playsinline`, and is H.264 MP4 with faststart, kept under about 600 KB.
