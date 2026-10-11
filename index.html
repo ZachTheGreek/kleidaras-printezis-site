@@ -185,7 +185,7 @@
     @keyframes settle { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
     .rise { opacity: 0; animation: rise 700ms var(--ease-out) forwards; }
     .settle { opacity: 0; animation: settle 900ms var(--ease-out) 120ms forwards; }
-    .d1 { animation-delay: 60ms; } .d2 { animation-delay: 160ms; } .d3 { animation-delay: 260ms; } .d4 { animation-delay: 360ms; }
+    .d1 { animation-delay: 60ms; } .d2 { animation-delay: 160ms; } .d3 { animation-delay: 260ms; } .d4 { animation-delay: 360ms; } .d5 { animation-delay: 460ms; }
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -198,101 +198,155 @@
     .call-bar { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
     @media (max-width: 1023px) { body { padding-bottom: 88px; } }
 
-    /* Gallery ("Focus Cards"). The original animates `filter: blur` with transition-all; here the blur is a
-       pre-blurred copy of the photo whose opacity fades, so only opacity and transform ever animate. */
-    .focus-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-    @media (min-width: 768px) { .focus-grid { gap: 24px; } }
-    @media (min-width: 1024px) { .focus-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; } }
-    .focus-card { aspect-ratio: 4 / 5; transition: transform 360ms var(--ease-out); }
-    .focus-card .focus-sharp { transition: transform 700ms var(--ease-out); }
-    .focus-card .focus-blur {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      filter: blur(10px); transform: scale(1.08); opacity: 0; pointer-events: none;
-      transition: opacity 360ms var(--ease-out);
+    /* Gallery ("Focus Cards", ported from 21st.dev). The blur is a tiny pre-blurred copy whose opacity changes,
+       so only opacity and transform ever move.
+       From 1024px with a mouse: hovering a photo blurs and shrinks the others.
+       Below 1024px: a swipeable strip. The photo in the middle is sharp; its neighbours blur and shrink in step
+       with the finger, and tapping a blurred photo brings it to the middle. */
+    .focus-card { aspect-ratio: 4 / 5; }
+    .focus-card .focus-blur { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; }
+    .focus-card figcaption { left: 16px; right: 16px; bottom: 14px; font-size: 16px; }
+    .focus-dots { display: none; }
+    @media (min-width: 1024px) {
+      .focus-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+      .focus-card { transition: transform 360ms var(--ease-out); }
+      .focus-card .focus-sharp { transition: transform 700ms var(--ease-out); }
+      .focus-card .focus-blur { transition: opacity 360ms var(--ease-out); }
+      .focus-card figcaption { left: 20px; right: 20px; bottom: 18px; font-size: 17px; }
     }
-    .focus-card figcaption { left: 14px; right: 14px; bottom: 12px; font-size: 15px; }
-    @media (min-width: 768px) { .focus-card figcaption { left: 20px; right: 20px; bottom: 18px; font-size: 17px; } }
-    @media (hover: hover) and (pointer: fine) {
+    @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
       .focus-grid:has(.focus-card:hover) .focus-card:not(:hover) { transform: scale(0.98); }
       .focus-grid:has(.focus-card:hover) .focus-card:not(:hover) .focus-blur { opacity: 1; }
       .focus-card:hover .focus-sharp { transform: scale(1.04); }
     }
-
-    /* Numbers band */
-    .stats { --rule: rgba(212,174,106,.28); }
-    .stat { display: flex; flex-direction: column; gap: 10px; padding: 22px 12px 22px 0; }
-    .stat:nth-child(even) { padding-left: 20px; border-left: 1px solid var(--rule); }
-    .stat:nth-child(n+3) { border-top: 1px solid var(--rule); }
-    @media (min-width: 1024px) {
-      .stat, .stat:nth-child(even), .stat:nth-child(n+3) { padding: 6px 16px 6px 36px; border-top: 0; border-left: 1px solid var(--rule); }
-      .stat:first-child { padding-left: 0; border-left: 0; }
+    @media (max-width: 1023px) {
+      .focus-grid {
+        position: relative; display: flex; gap: 14px;
+        overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+        margin-inline: -20px; padding: 4px 12vw 6px;
+      }
+      .focus-grid::-webkit-scrollbar { display: none; }
+      .focus-grid:focus-visible { outline: 2px solid var(--burgundy); outline-offset: -2px; }
+      .focus-card { flex: 0 0 76vw; scroll-snap-align: center; scale: calc(1 - var(--d, 0) * .07); }
+      .focus-card .focus-blur { opacity: var(--d, 0); }
+      .focus-card figcaption { opacity: calc(1 - var(--d, 0) * 1.6); }
+      .focus-dots { display: flex; justify-content: center; gap: 2px; margin-top: 14px; }
+      .focus-dot {
+        display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 999px;
+        background: transparent; cursor: pointer; transition: transform 200ms var(--ease-spring);
+      }
+      .focus-dot::before { content: ""; width: 9px; height: 9px; border-radius: 999px; background: #B9C1C3; transition: transform 300ms var(--ease-spring); }
+      .focus-dot:hover::before { background: var(--graphite); }
+      .focus-dot:active { transform: scale(0.88); }
+      .focus-dot:focus-visible { outline: 2px solid var(--burgundy); outline-offset: -2px; }
+      .focus-dot[aria-current="true"]::before { background: var(--burgundy); transform: scale(1.4); }
     }
-    .stat-num {
-      display: inline-flex; align-items: flex-start; gap: 6px;
-      font-family: Piazzolla, Georgia, serif; font-weight: 700; font-size: clamp(48px, 6vw, 76px); line-height: 1; letter-spacing: -0.03em;
-      color: var(--brass-light); font-variant-numeric: lining-nums;
-    }
-    .stat-star { width: .36em; height: .36em; margin-top: .1em; flex: none; }
-    .stat-label { font-size: 17px; line-height: 1.4; color: rgba(238,240,239,.85); }
-    .stats.will-reveal .stat { opacity: 0; transform: translateY(18px); }
-    .stats.will-reveal.is-in .stat {
-      opacity: 1; transform: none;
-      transition: opacity 600ms var(--ease-out), transform 700ms var(--ease-out);
-      transition-delay: calc(var(--i) * 110ms);
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .focus-grid { margin-inline: -32px; padding-inline: 28vw; }
+      .focus-card { flex-basis: 44vw; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .focus-card, .focus-card .focus-sharp, .focus-card .focus-blur { transition: none; }
+      .focus-card, .focus-card .focus-sharp, .focus-card .focus-blur, .focus-dot, .focus-dot::before { transition: none; }
       .focus-grid:has(.focus-card:hover) .focus-card:not(:hover), .focus-card:hover .focus-sharp { transform: none; }
+      .focus-card { scale: none; }
     }
 
-    /* Before / after slider. --pos (0–100) is set by JS; everything that moves uses transform. */
-    .ba-frame {
-      --pos: 50;
-      position: relative; overflow: hidden; isolation: isolate;
-      aspect-ratio: 4 / 5; max-height: 720px; width: 100%;
-      border-radius: 16px; background: var(--nickel-2); box-shadow: var(--shadow-elevated);
-      touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none;
+    /* Hero numbers: they count up from 0 the first time they are on screen */
+    .hero-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 40px; border-top: 1px solid rgba(212,174,106,.3); }
+    .hero-stat { display: flex; flex-direction: column; gap: 8px; padding: 20px 12px 18px 0; }
+    .hero-stat:nth-child(even) { padding-left: 20px; border-left: 1px solid rgba(212,174,106,.3); }
+    .hero-stat:nth-child(n+3) { border-top: 1px solid rgba(212,174,106,.3); }
+    @media (min-width: 640px) {
+      .hero-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .hero-stat, .hero-stat:nth-child(even), .hero-stat:nth-child(n+3) { padding: 22px 10px 2px 22px; border-top: 0; border-left: 1px solid rgba(212,174,106,.3); }
+      .hero-stat:first-child { padding-left: 0; border-left: 0; }
     }
-    @media (min-width: 1024px) { .ba-frame { aspect-ratio: 1 / 1; max-height: 640px; } }
-    .ba-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
-    .ba-before { position: absolute; inset: 0; overflow: hidden; transform: translateX(calc((var(--pos) - 100) * 1%)); }
-    .ba-before img { transform: translateX(calc((100 - var(--pos)) * 1%)); }
-    .ba-frame::after { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--burgundy); mix-blend-mode: multiply; opacity: .12; pointer-events: none; }
-    .ba-handle { position: absolute; inset: 0; z-index: 2; pointer-events: none; transform: translateX(calc((var(--pos) - 50) * 1%)); }
-    .ba-handle::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 1px); width: 2px; background: var(--white); box-shadow: 0 0 0 1px rgba(26,22,20,.18); }
-    .ba-knob {
-      position: absolute; top: 50%; left: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
-      display: grid; place-items: center; border-radius: 999px;
-      background: var(--white); color: var(--burgundy); box-shadow: var(--shadow-floating);
-      transition: transform 220ms var(--ease-spring);
+    .hero-stat-num {
+      display: inline-flex; align-items: flex-start; gap: 5px;
+      font-family: Piazzolla, Georgia, serif; font-weight: 700; font-size: clamp(40px, 4.2vw, 54px); line-height: 1; letter-spacing: -0.03em;
+      color: var(--brass-light); font-variant-numeric: lining-nums tabular-nums;
     }
-    .ba-frame:hover .ba-knob { transform: scale(1.06); }
-    .ba-frame.is-dragging .ba-knob { transform: scale(0.94); }
-    .ba-range:focus-visible ~ .ba-handle .ba-knob { box-shadow: 0 0 0 3px var(--white), 0 0 0 6px var(--burgundy), var(--shadow-floating); }
-    .ba-label {
-      position: absolute; top: 16px; z-index: 2; padding: 7px 14px; border-radius: 999px;
-      background: rgba(26,22,20,.66); color: var(--white); font-weight: 600; font-size: 15px; line-height: 1.2;
-      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      pointer-events: none; transition: opacity 200ms var(--ease-out);
-    }
-    .ba-label--before { left: 16px; }
-    .ba-label--after { right: 16px; }
-    .ba-frame[data-hide-before] .ba-label--before, .ba-frame[data-hide-after] .ba-label--after { opacity: 0; }
-    .ba.is-entering { animation: ba-in 320ms var(--ease-out); }
-    @keyframes ba-in { from { opacity: 0; } to { opacity: 1; } }
+    .hero-stat-num .stat-star { width: .34em; height: .34em; margin-top: .08em; flex: none; }
+    .hero-stat-label { font-size: 15px; line-height: 1.35; color: rgba(238,240,239,.82); }
 
-    .ba-switch { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ba-switch[hidden] { display: none; }
-    .ba-switch button {
-      min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer;
-      background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line);
-      font-family: Commissioner, system-ui, sans-serif; font-weight: 600; font-size: 16px; line-height: 1;
-      transition: transform 200ms var(--ease-spring);
+    /* Process ("Index List Carousel", ported from 21st.dev): numbered steps on one side, one photo on the other.
+       Picking a step wipes its photo in over the last one: from the right going down the list, from the left going
+       back up. The wipe is a mask made of two opposite translates, so only transform and opacity animate. */
+    .steps { display: grid; gap: 32px; grid-template-areas: "head" "pane" "list"; }
+    @media (min-width: 1024px) {
+      .steps { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-areas: "head pane" "list pane"; column-gap: 64px; row-gap: 36px; }
     }
-    .ba-switch button:hover { background: var(--white); box-shadow: inset 0 0 0 1.5px var(--graphite); }
-    .ba-switch button:active { transform: scale(0.96); }
-    .ba-switch button:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; }
-    .ba-switch button[aria-pressed="true"] { background: var(--burgundy); color: var(--white); box-shadow: none; }
+    @media (min-width: 640px) and (max-width: 1023px) { .steps { max-width: 600px; margin-inline: auto; } }
+    .steps-head { grid-area: head; }
+    .steps-list { grid-area: list; border-top: 1px solid rgba(212,174,106,.25); }
+    .steps-pane {
+      grid-area: pane; position: relative; overflow: hidden; isolation: isolate;
+      aspect-ratio: 4 / 5; border-radius: 16px; background: #3A0D13; box-shadow: var(--shadow-floating);
+      touch-action: pan-y; user-select: none; -webkit-user-select: none;
+    }
+    @media (min-width: 1024px) { .steps-pane { aspect-ratio: auto; min-height: 600px; } }
+    .step-slide { position: absolute; inset: 0; overflow: hidden; visibility: hidden; translate: 100% 0; }
+    .step-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; translate: -100% 0; scale: 1.08; -webkit-user-drag: none; }
+    .step-slide[data-l="before"] { translate: -100% 0; }
+    .step-slide[data-l="before"] img { translate: 100% 0; }
+    .step-slide[data-l="was"] { visibility: visible; z-index: 1; translate: 0 0; }
+    .step-slide[data-l="was"] img { translate: 0 0; scale: 1; }
+    .step-slide[data-l="on"] { visibility: visible; z-index: 2; translate: 0 0; transition: translate 850ms cubic-bezier(.7, 0, .2, 1); }
+    .step-slide[data-l="on"] img { translate: 0 0; scale: 1; transition: translate 850ms cubic-bezier(.7, 0, .2, 1), scale 1300ms var(--ease-out); }
+    .steps-pane::before {
+      content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      background: linear-gradient(to bottom, rgba(26,22,20,.5), rgba(26,22,20,0) 20%), linear-gradient(to top, rgba(26,22,20,.75), rgba(26,22,20,0) 50%);
+    }
+    .steps-pane::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: var(--burgundy); mix-blend-mode: multiply; opacity: .14; }
+    .steps-bars { position: absolute; top: 14px; left: 14px; right: 14px; z-index: 4; display: flex; gap: 5px; pointer-events: none; }
+    .steps-bar { flex: 1; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(255,255,255,.32); }
+    .steps-bar i { display: block; height: 100%; background: var(--white); transform-origin: left center; transform: scaleX(0); }
+    .steps-bar[data-s="done"] i, .steps-bar[data-s="now"] i { transform: scaleX(1); }
+    .steps[data-playing] .steps-bar[data-s="now"] i { animation: steps-fill var(--interval, 3500ms) linear both; }
+    .steps[data-held] .steps-bar i { animation-play-state: paused; }
+    @keyframes steps-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .steps-caption { position: absolute; left: 20px; right: 72px; bottom: 18px; z-index: 4; color: var(--white); pointer-events: none; }
+    .steps-count { display: block; font-size: 14px; font-weight: 600; color: var(--brass-light); }
+    .steps-caption-text { display: block; margin-top: 4px; font-size: 17px; font-weight: 500; line-height: 1.45; }
+    .steps-caption.is-new .steps-caption-text { animation: steps-cap 450ms var(--ease-out); }
+    @keyframes steps-cap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .steps-toggle { right: 14px; bottom: 14px; z-index: 5; }
+    .step-row {
+      position: relative; display: flex; align-items: baseline; gap: 16px; width: 100%;
+      padding: 12px 0; border: 0; border-bottom: 1px solid rgba(212,174,106,.25); background: transparent;
+      color: var(--nickel); text-align: left; cursor: pointer;
+    }
+    .step-row::before {
+      content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 3px;
+      background: var(--brass-light); transform: scaleY(0); transition: transform 350ms var(--ease-out);
+    }
+    .step-row > span { opacity: .58; transition: opacity 300ms var(--ease-out), transform 450ms var(--ease-spring); }
+    .step-num { flex: none; min-width: 2ch; font-size: 15px; font-weight: 600; color: var(--brass-light); font-variant-numeric: tabular-nums; }
+    .step-title { font-family: Piazzolla, Georgia, serif; font-weight: 600; font-size: clamp(20px, 2vw, 25px); line-height: 1.2; letter-spacing: -0.01em; }
+    .step-row:hover > span { opacity: .9; }
+    .step-row[aria-selected="true"]::before { transform: scaleY(1); }
+    .step-row[aria-selected="true"] > span { opacity: 1; transform: translateX(16px); }
+    .step-row:active > span { opacity: .7; }
+    .step-row:focus-visible { outline: 2px solid var(--brass-light); outline-offset: -2px; border-radius: 6px; }
+    @media (prefers-reduced-motion: reduce) {
+      .step-slide[data-l="on"], .step-slide[data-l="on"] img, .step-row::before, .step-row > span { transition: none; }
+      .step-slide img { scale: 1; }
+      .steps-caption.is-new .steps-caption-text { animation: none; }
+    }
+
+    /* Reviews, laid out like Google Maps so the stars read as Google's.
+       #FBBC04 is Google's star yellow: used for review stars only, nowhere else. */
+    .g-stars { display: inline-flex; gap: 2px; color: #FBBC04; }
+    .g-stars svg { width: 18px; height: 18px; }
+    .g-rating { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+    .g-rating-num { font-family: Piazzolla, Georgia, serif; font-weight: 700; font-size: 60px; line-height: 1; letter-spacing: -0.03em; color: var(--ink); }
+    .g-rating .g-stars svg { width: 24px; height: 24px; }
+    .review { padding: 24px; border-radius: 16px; }
+    .review-head { display: flex; align-items: center; gap: 12px; }
+    .review-avatar { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; background: var(--burgundy-tint); color: var(--burgundy); font-weight: 600; font-size: 18px; }
+    .review-name { display: block; font-weight: 600; line-height: 1.3; color: var(--ink); }
+    .review-source { display: block; font-size: 14px; line-height: 1.4; color: var(--graphite); }
+    .review blockquote { margin-top: 10px; font-size: 18px; line-height: 1.6; color: var(--ink); }
 
     /* FAQ: native <details>. Only the icon rotates and the answer fades in (transform + opacity). */
     .faq-item summary {
@@ -317,9 +371,8 @@
     @media (min-width: 768px) { .faq-body { padding-right: 60px; } }
 
     @media (prefers-reduced-motion: reduce) {
-      .ba-knob, .ba-label, .ba-switch button, .faq-icon { transition: none; }
-      .ba.is-entering, .faq-item[open] .faq-body { animation: none; }
-      .ba-frame:hover .ba-knob, .ba-frame.is-dragging .ba-knob, .ba-switch button:active { transform: none; }
+      .faq-icon { transition: none; }
+      .faq-item[open] .faq-body { animation: none; }
     }
 
     /* Mobile menu. Layers: page < backdrop (40) < panel (45) < header + call bar (50).
@@ -401,8 +454,9 @@
       <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
       <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
       <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+      <!-- Material Icons "star" (Apache 2.0), the star shape Google uses for ratings -->
+      <symbol id="i-gstar" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
       <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
-      <symbol id="i-chevrons-lr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-5 5 5 5"/><path d="m15 7 5 5-5 5"/></symbol>
       <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></symbol>
       <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     </defs>
@@ -478,7 +532,7 @@
             Θεμιστοκλέους 31, κοντά στην πλατεία Κάνιγγος
           </p>
           <h1 id="hero-title" class="rise d2 t-display text-nickel">Κλειδαράς στο κέντρο της Αθήνας, από πατέρα σε γιο.</h1>
-          <p class="rise d3 t-lead measure mt-6 text-nickel/85">Κλειδιά, κλειδαριές, θωρακισμένες πόρτες, αυτοκίνητα και συναγερμοί. Ο πατέρας κάνει αυτή τη δουλειά 35 χρόνια και σήμερα τη συνεχίζει μαζί με τους δύο γιους του.</p>
+          <p class="rise d3 t-lead measure mt-6 text-nickel/85">Κλειδιά, κλειδαριές, θωρακισμένες πόρτες, αυτοκίνητα και συναγερμοί. Ένα οικογενειακό μαγαζί, με τον πατέρα και τους δύο γιους του.</p>
           <div class="rise d4 mt-9 flex flex-wrap gap-4">
             <a href="tel:+302130444629" class="btn btn-on-dark">
               <svg class="icon-sm" aria-hidden="true"><use href="#i-phone"/></svg>Καλέστε 213 044 4629
@@ -487,12 +541,13 @@
               <svg class="icon-sm" aria-hidden="true"><use href="#i-map-pin"/></svg>Οδηγίες στον χάρτη
             </a>
           </div>
-          <p class="rise d4 mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-[16px] text-nickel/85">
-            <span class="flex gap-0.5 text-brass-light" aria-hidden="true">
-              <svg class="icon-sm"><use href="#i-star"/></svg><svg class="icon-sm"><use href="#i-star"/></svg><svg class="icon-sm"><use href="#i-star"/></svg><svg class="icon-sm"><use href="#i-star"/></svg><svg class="icon-sm"><use href="#i-star"/></svg>
-            </span>
-            <span>4,8 στα 5 από <a class="link" href="#kritikes">74 κριτικές στο Google</a></span>
-          </p>
+          <!-- Numbers count up from 0 the first time they are on screen. Only verifiable facts: 74 is also in the reviews and the JSON-LD. -->
+          <ul class="hero-stats rise d5" role="list">
+            <li class="hero-stat"><span class="hero-stat-num"><span data-count="35" aria-hidden="true">35</span></span><span class="hero-stat-label"><span class="sr-only">35 </span>χρόνια στο επάγγελμα</span></li>
+            <li class="hero-stat"><span class="hero-stat-num"><span data-count="2" aria-hidden="true">2</span></span><span class="hero-stat-label"><span class="sr-only">2 </span>γενιές κλειδαράδων</span></li>
+            <li class="hero-stat"><span class="hero-stat-num"><span data-count="4.8" data-decimals="1" aria-hidden="true">4,8</span><svg class="stat-star" aria-hidden="true"><use href="#i-star"/></svg></span><span class="hero-stat-label"><span class="sr-only">4,8 στα 5, </span>βαθμολογία στο Google</span></li>
+            <li class="hero-stat"><span class="hero-stat-num"><span data-count="74" aria-hidden="true">74</span></span><span class="hero-stat-label"><span class="sr-only">74 </span>κριτικές στο Google</span></li>
+          </ul>
         </div>
         <figure class="settle photo lg:col-span-5 aspect-[4/5] max-h-[620px] w-full floating">
           <img src="assets/images/kopi-kleidion.jpg" alt="Ο πατέρας κόβει κλειδί στη μηχανή του μαγαζιού" width="1200" height="1600" fetchpriority="high">
@@ -589,7 +644,7 @@
               </div>
             </li>
           </ul>
-          <figure class="photo photo-caption aspect-[4/5] lg:col-span-5">
+          <figure class="photo photo-caption hidden aspect-[4/5] lg:col-span-5 lg:block">
             <img src="assets/images/sygkollisi-eisodos.jpg" alt="Ο πατέρας κάνει συγκόλληση σε σιδερένια είσοδο πολυκατοικίας" width="1200" height="1600" loading="lazy" style="object-position:40% 40%">
             <figcaption>Συγκόλληση σε σιδερένια είσοδο πολυκατοικίας</figcaption>
           </figure>
@@ -597,103 +652,87 @@
       </div>
     </section>
 
-    <!-- Gallery: port of the 21st.dev "Focus Cards" component. Hovering a photo blurs and shrinks the others;
-         captions stay visible so touch screens (no hover) get them too. -->
+    <!-- Gallery: port of the 21st.dev "Focus Cards" component. Desktop: hovering a photo blurs the others.
+         Phones and tablets: a swipeable strip where the photo in the middle is in focus. Captions always show. -->
     <section id="douleies" class="bg-nickel-2 py-24 md:py-32" aria-labelledby="douleies-title">
       <div class="mx-auto max-w-[1200px] px-5 md:px-8">
         <div class="max-w-[720px]">
           <h2 id="douleies-title" class="t-h2">Από τη δουλειά μας</h2>
           <p class="t-lead mt-5 text-graphite">Φωτογραφίες από δουλειές μας σε σπίτια, πολυκατοικίες και επιχειρήσεις.</p>
         </div>
-        <div class="focus-grid mt-14">
+        <div class="focus-grid mt-14" aria-label="Φωτογραφίες από τη δουλειά μας">
           <figure class="focus-card photo photo-caption">
             <img class="focus-sharp" src="assets/images/douleia-sideroporta.jpg" alt="Ο πατέρας δουλεύει στην κλειδαριά σιδερένιας πόρτας εισόδου" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-sideroporta.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-sideroporta.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
             <figcaption>Σιδερένια πόρτα εισόδου</figcaption>
           </figure>
           <figure class="focus-card photo photo-caption">
             <img class="focus-sharp" src="assets/images/douleia-ilektroniki-kleidaria.jpg" alt="Ηλεκτρονική κλειδαριά με κάρτα και κωδικό σε γκρι πόρτα" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-ilektroniki-kleidaria.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-ilektroniki-kleidaria.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
             <figcaption>Ηλεκτρονική κλειδαριά</figcaption>
           </figure>
           <figure class="focus-card photo photo-caption">
-            <img class="focus-sharp" src="assets/images/douleia-mixanismos-epanaforas.jpg" alt="Ο γιος τοποθετεί μηχανισμό επαναφοράς σε ξύλινη πόρτα" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-mixanismos-epanaforas.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
-            <figcaption>Μηχανισμός επαναφοράς</figcaption>
+            <img class="focus-sharp" src="assets/images/douleia-kylindros.jpg" alt="Καινούργιος κύλινδρος σε παλιά μεταλλική πόρτα" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-kylindros.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
+            <figcaption>Νέος κύλινδρος</figcaption>
           </figure>
           <figure class="focus-card photo photo-caption">
             <img class="focus-sharp" src="assets/images/douleia-tilekontrol.jpg" alt="Ο πατέρας επισκευάζει τηλεκοντρόλ με μεγεθυντικό φακό" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-tilekontrol.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-tilekontrol.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
             <figcaption>Επισκευή τηλεκοντρόλ</figcaption>
           </figure>
           <figure class="focus-card photo photo-caption">
             <img class="focus-sharp" src="assets/images/douleia-kagkeloporta.jpg" alt="Ηλεκτρική κλειδαριά σε μπλε καγκελόπορτα πολυκατοικίας" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-kagkeloporta.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-kagkeloporta.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
             <figcaption>Κλειδαριά καγκελόπορτας</figcaption>
           </figure>
           <figure class="focus-card photo photo-caption">
             <img class="focus-sharp" src="assets/images/douleia-xylini-porta.jpg" alt="Ο πατέρας δουλεύει στην κλειδαριά ξύλινης πόρτας" width="900" height="1200" loading="lazy">
-            <img class="focus-blur" src="assets/images/douleia-xylini-porta.jpg" alt="" aria-hidden="true" width="900" height="1200" loading="lazy">
+            <img class="focus-blur" src="assets/images/blur/douleia-xylini-porta.jpg" alt="" aria-hidden="true" width="180" height="240" loading="lazy">
             <figcaption>Κλειδαριά ξύλινης πόρτας</figcaption>
           </figure>
         </div>
+        <div class="focus-dots" role="group" aria-label="Επιλέξτε φωτογραφία"></div>
       </div>
     </section>
 
-    <!-- Before / after. TODO: the images are placeholders; swap in the client's real before/after pairs and captions -->
-    <section id="prin-meta" class="py-24 md:py-32" aria-labelledby="prin-meta-title">
-      <div class="mx-auto grid max-w-[1200px] items-center gap-12 px-5 md:px-8 lg:grid-cols-12 lg:gap-16">
-        <div class="lg:col-span-5">
-          <h2 id="prin-meta-title" class="t-h2">Πριν και μετά</h2>
-          <p class="t-lead measure mt-5 text-graphite">Πραγματικές δουλειές μας: πώς ήταν πριν και πώς τις αφήσαμε.</p>
-          <p class="mt-8 flex items-center gap-3 text-[16px] text-graphite">
-            <svg class="icon-sm flex-none text-burgundy" aria-hidden="true"><use href="#i-chevrons-lr"/></svg>
-            Σύρετε τη γραμμή πάνω στη φωτογραφία.
-          </p>
-          <div class="ba-switch mt-8" role="group" aria-label="Επιλέξτε δουλειά" hidden></div>
-        </div>
-        <div class="lg:col-span-7">
-          <div class="ba-set">
-            <figure class="ba" data-title="Παράδειγμα 1">
-              <div class="ba-frame">
-                <img src="https://placehold.co/1200x1500/F2E4E3/7A1F2B/png?font=noto-sans&amp;text=%CE%A6%CF%89%CF%84%CE%BF%CE%B3%CF%81%CE%B1%CF%86%CE%AF%CE%B1%20%C2%AB%CE%BC%CE%B5%CF%84%CE%AC%C2%BB" alt="Μετά: προσωρινή εικόνα" width="1200" height="1500" loading="lazy">
-                <div class="ba-before">
-                  <img src="https://placehold.co/1200x1500/C9CFD0/596064/png?font=noto-sans&amp;text=%CE%A6%CF%89%CF%84%CE%BF%CE%B3%CF%81%CE%B1%CF%86%CE%AF%CE%B1%20%C2%AB%CF%80%CF%81%CE%B9%CE%BD%C2%BB" alt="Πριν: προσωρινή εικόνα" width="1200" height="1500" loading="lazy">
-                </div>
-                <span class="ba-label ba-label--before" aria-hidden="true">Πριν</span>
-                <span class="ba-label ba-label--after" aria-hidden="true">Μετά</span>
-                <input class="ba-range sr-only" type="range" min="0" max="100" value="50" aria-label="Σύγκριση πριν και μετά">
-                <div class="ba-handle" aria-hidden="true"><span class="ba-knob"><svg class="icon"><use href="#i-chevrons-lr"/></svg></span></div>
-              </div>
-              <figcaption class="mt-4 text-[16px] text-graphite">Εδώ μπαίνει μία πρόταση για τη δουλειά: τι αλλάξαμε και πού.</figcaption>
-            </figure>
-            <figure class="ba" data-title="Παράδειγμα 2">
-              <div class="ba-frame">
-                <img src="https://placehold.co/1200x1500/F2E4E3/7A1F2B/png?font=noto-sans&amp;text=%CE%94%CE%B5%CF%8D%CF%84%CE%B5%CF%81%CE%B7%20%CE%B4%CE%BF%CF%85%CE%BB%CE%B5%CE%B9%CE%AC%2C%20%C2%AB%CE%BC%CE%B5%CF%84%CE%AC%C2%BB" alt="Μετά: προσωρινή εικόνα" width="1200" height="1500" loading="lazy">
-                <div class="ba-before">
-                  <img src="https://placehold.co/1200x1500/C9CFD0/596064/png?font=noto-sans&amp;text=%CE%94%CE%B5%CF%8D%CF%84%CE%B5%CF%81%CE%B7%20%CE%B4%CE%BF%CF%85%CE%BB%CE%B5%CE%B9%CE%AC%2C%20%C2%AB%CF%80%CF%81%CE%B9%CE%BD%C2%BB" alt="Πριν: προσωρινή εικόνα" width="1200" height="1500" loading="lazy">
-                </div>
-                <span class="ba-label ba-label--before" aria-hidden="true">Πριν</span>
-                <span class="ba-label ba-label--after" aria-hidden="true">Μετά</span>
-                <input class="ba-range sr-only" type="range" min="0" max="100" value="50" aria-label="Σύγκριση πριν και μετά">
-                <div class="ba-handle" aria-hidden="true"><span class="ba-knob"><svg class="icon"><use href="#i-chevrons-lr"/></svg></span></div>
-              </div>
-              <figcaption class="mt-4 text-[16px] text-graphite">Εδώ μπαίνει μία πρόταση για τη δεύτερη δουλειά.</figcaption>
-            </figure>
+    <!-- Process: port of the 21st.dev "Index List Carousel". One real job, top to bottom = start to finish.
+         The client's door sign is blurred in the photos of steps 6 and 8. -->
+    <section id="diadikasia" class="on-dark bg-burgundy-deep py-24 text-nickel md:py-32" aria-labelledby="diadikasia-title">
+      <div class="mx-auto max-w-[1200px] px-5 md:px-8">
+        <div class="steps" data-interval="3500">
+          <div class="steps-head">
+            <h2 id="diadikasia-title" class="t-h2">Μια πόρτα, βήμα βήμα</h2>
+            <p class="t-lead measure mt-5 text-nickel/80">Αλλάξαμε την κλειδαριά σε μια ξύλινη πόρτα και της βάλαμε μηχανισμό επαναφοράς. Δείτε όλη τη δουλειά, από την αρχή ως το τέλος.</p>
+          </div>
+          <div class="steps-list" role="tablist" aria-orientation="vertical" aria-label="Τα βήματα της δουλειάς">
+            <button type="button" class="step-row" role="tab" id="step-tab-1" aria-selected="true" aria-controls="steps-panel" tabindex="0" data-caption="Η ξύλινη πόρτα με την παλιά της κλειδαριά."><span class="step-num" aria-hidden="true">01</span><span class="step-title">Η πόρτα πριν</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-2" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξεβιδώνουμε την παλιά κλειδαριά και τη βγάζουμε από την πόρτα."><span class="step-num" aria-hidden="true">02</span><span class="step-title">Βγάζουμε την παλιά κλειδαριά</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-3" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Βγάζουμε την πόρτα από τους μεντεσέδες και τη δουλεύουμε στο πάτωμα."><span class="step-num" aria-hidden="true">03</span><span class="step-title">Κατεβάζουμε την πόρτα</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-4" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Μετράμε και σημαδεύουμε τη νέα κλειδαριά πολλαπλών σημείων."><span class="step-num" aria-hidden="true">04</span><span class="step-title">Μετράμε τη νέα κλειδαριά</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-5" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η καινούργια κλειδαριά μπαίνει στο πλάι της πόρτας."><span class="step-num" aria-hidden="true">05</span><span class="step-title">Η νέα κλειδαριά στη θέση της</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-6" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Ξανακρεμάμε την πόρτα και βιδώνουμε τα εξαρτήματα της κλειδαριάς."><span class="step-num" aria-hidden="true">06</span><span class="step-title">Ξανά στη θέση της</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-7" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Βάζουμε μηχανισμό επαναφοράς, για να κλείνει η πόρτα μόνη της."><span class="step-num" aria-hidden="true">07</span><span class="step-title">Μηχανισμός επαναφοράς</span></button>
+            <button type="button" class="step-row" role="tab" id="step-tab-8" aria-selected="false" aria-controls="steps-panel" tabindex="-1" data-caption="Η πόρτα κλειδώνει σε πολλά σημεία και κλείνει μόνη της."><span class="step-num" aria-hidden="true">08</span><span class="step-title">Έτοιμη</span></button>
+          </div>
+          <div class="steps-pane" id="steps-panel" role="tabpanel" aria-labelledby="step-tab-1">
+            <div class="step-slide" data-l="on"><img src="assets/images/diadikasia-1-prin.jpg" alt="Ξύλινη πόρτα με παλιά κλειδαριά και ορειχάλκινη λαβή" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-2-palia-kleidaria.jpg" alt="Ο γιος βγάζει την παλιά κλειδαριά από το πλάι της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-3-katebasma.jpg" alt="Η ξύλινη πόρτα ξαπλωμένη στο πάτωμα, με τα εργαλεία γύρω της" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-4-metrima.jpg" alt="Χέρια σημαδεύουν με μαρκαδόρο τη μακριά ορειχάλκινη κλειδαριά" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-5-nea-kleidaria.jpg" alt="Η νέα κλειδαριά πολλαπλών σημείων τοποθετημένη στο πλάι της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-6-kylindros.jpg" alt="Ο γιος βιδώνει τα εξαρτήματα της κλειδαριάς δίπλα στο πόμολο" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-7-mixanismos.jpg" alt="Ο γιος ρυθμίζει τον μηχανισμό επαναφοράς στο πάνω μέρος της πόρτας" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="step-slide" data-l="after"><img src="assets/images/diadikasia-8-etoimi.jpg" alt="Η ξύλινη πόρτα έτοιμη, με τη νέα κλειδαριά και τον μηχανισμό επαναφοράς" width="900" height="1200" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="steps-bars" aria-hidden="true"><span class="steps-bar" data-s="now"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span><span class="steps-bar" data-s="next"><i></i></span></div>
+            <p class="steps-caption"><span class="steps-count">Βήμα 1 από 8</span><span class="steps-caption-text">Η ξύλινη πόρτα με την παλιά της κλειδαριά.</span></p>
+            <button type="button" class="video-toggle steps-toggle" data-state="paused" aria-label="Αυτόματη προβολή των βημάτων">
+              <svg class="icon-sm icon-play" aria-hidden="true"><use href="#i-play"/></svg>
+              <svg class="icon-sm icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+            </button>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Numbers band: only verifiable facts. Update the review count when it changes (also in the hero and reviews). -->
-    <section class="on-dark bg-burgundy-deep text-nickel" aria-labelledby="noumera-title">
-      <h2 id="noumera-title" class="sr-only">Με μια ματιά</h2>
-      <ul class="stats mx-auto grid max-w-[1200px] grid-cols-2 px-5 py-14 md:px-8 md:py-20 lg:grid-cols-4">
-        <li class="stat" style="--i:0"><span class="stat-num">35</span><span class="stat-label">χρόνια στο επάγγελμα</span></li>
-        <li class="stat" style="--i:1"><span class="stat-num">2</span><span class="stat-label">γενιές κλειδαράδων</span></li>
-        <li class="stat" style="--i:2"><span class="stat-num">4,8<svg class="stat-star" aria-hidden="true"><use href="#i-star"/></svg></span><span class="sr-only">στα 5,</span><span class="stat-label">βαθμολογία στο Google</span></li>
-        <li class="stat" style="--i:3"><span class="stat-num">74</span><span class="stat-label">κριτικές πελατών</span></li>
-      </ul>
     </section>
 
     <!-- Family -->
@@ -722,28 +761,38 @@
       </div>
     </section>
 
-    <!-- Reviews -->
+    <!-- Reviews: laid out like Google Maps. Both are 5/5 on Google (checked against the Google listing on 2026-10-10). -->
     <section id="kritikes" class="bg-nickel-2 py-24 md:py-32" aria-labelledby="kritikes-title">
       <div class="mx-auto grid max-w-[1200px] gap-12 px-5 md:px-8 lg:grid-cols-12 lg:gap-16">
         <div class="lg:col-span-4">
           <h2 id="kritikes-title" class="t-h2">Τι λένε οι πελάτες μας</h2>
-          <p class="mt-5 text-graphite">Μέσος όρος 4,8 στα 5, από 74 κριτικές στο Google.</p>
+          <div class="g-rating">
+            <span class="g-rating-num" aria-hidden="true">4,8</span>
+            <span>
+              <span class="g-stars" role="img" aria-label="4,8 στα 5 αστέρια"><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg></span>
+              <span class="mt-1 block text-[15px] text-graphite">74 κριτικές στο Google</span>
+            </span>
+          </div>
           <p class="mt-6">
             <a class="link font-medium" href="https://maps.google.com/?cid=4002719346990080603" target="_blank" rel="noopener">Δείτε όλες τις κριτικές στο Google</a>
           </p>
         </div>
-        <div class="space-y-10 lg:col-span-8">
-          <figure class="border-l-2 border-brass pl-7">
-            <blockquote class="font-display text-[clamp(24px,2.6vw,30px)] font-semibold leading-[1.3] tracking-[-0.01em]">
-              «Εξαιρετικός επαγγελματίας! Ο κλειδαράς ανταποκρίθηκε άμεσα, ήρθε στην ώρα του και έλυσε το πρόβλημα γρήγορα.»
-            </blockquote>
-            <figcaption class="mt-4 text-[16px] text-graphite">GMF 10, κριτική στο Google</figcaption>
+        <div class="grid items-start gap-6 md:grid-cols-2 lg:col-span-8">
+          <figure class="review elevated">
+            <figcaption class="review-head">
+              <span class="review-avatar" aria-hidden="true">G</span>
+              <span><span class="review-name">GMF 10</span><span class="review-source">Κριτική στο Google</span></span>
+            </figcaption>
+            <span class="g-stars mt-4" role="img" aria-label="5 στα 5 αστέρια"><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg></span>
+            <blockquote>Εξαιρετικός επαγγελματίας! Ο Κλειδαράς ανταποκρίθηκε άμεσα, ήρθε στην ώρα του και έλυσε το πρόβλημα γρήγορα…</blockquote>
           </figure>
-          <figure class="border-l-2 border-brass pl-7">
-            <blockquote class="font-display text-[clamp(24px,2.6vw,30px)] font-semibold leading-[1.3] tracking-[-0.01em]">
-              «Στοχευμένη και άμεση εξυπηρέτηση! Το αφεντικό πολύ φιλικό και βοηθητικό, αλλά και ο γιος πολύ έξυπνος.»
-            </blockquote>
-            <figcaption class="mt-4 text-[16px] text-graphite">Athanasios K., κριτική στο Google</figcaption>
+          <figure class="review elevated">
+            <figcaption class="review-head">
+              <span class="review-avatar" aria-hidden="true">A</span>
+              <span><span class="review-name">Athanasios K.</span><span class="review-source">Κριτική στο Google</span></span>
+            </figcaption>
+            <span class="g-stars mt-4" role="img" aria-label="5 στα 5 αστέρια"><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg><svg aria-hidden="true"><use href="#i-gstar"/></svg></span>
+            <blockquote>Στοχευμένη και άμεση εξυπηρέτηση! Το αφεντικό πολύ φιλικό και βοηθητικό, αλλά και ο γιος πολύ έξυπνος.</blockquote>
           </figure>
         </div>
       </div>
@@ -850,7 +899,7 @@
               <img src="assets/images/magazi-prosopsi.jpg" alt="Η είσοδος του μαγαζιού στη Θεμιστοκλέους 31" width="1600" height="1200" loading="lazy" style="object-position:60% 50%">
               <figcaption>Η είσοδος του μαγαζιού</figcaption>
             </figure>
-            <figure class="photo photo-caption aspect-[4/3]">
+            <figure class="photo photo-caption hidden aspect-[4/3] sm:block">
               <img src="assets/images/magazi-toixos-kleidion.jpg" alt="Ο τοίχος με τα κλειδιά και οι μηχανές κοπής μέσα στο μαγαζί" width="1600" height="1200" loading="lazy">
               <figcaption>Μέσα στο μαγαζί</figcaption>
             </figure>
@@ -1003,113 +1052,201 @@
       }
     });
 
-    // Before/after slider: drag with mouse or finger, tap to jump, or use the arrow keys (hidden range input)
-    document.querySelectorAll('.ba').forEach((fig) => {
-      const frame = fig.querySelector('.ba-frame');
-      const range = fig.querySelector('.ba-range');
-      const setPos = (value) => {
-        const pos = Math.min(100, Math.max(0, value));
-        const shown = Math.round(pos);
-        frame.style.setProperty('--pos', pos);
-        range.value = shown;
-        range.setAttribute('aria-valuetext', `Πριν ${shown}%, μετά ${100 - shown}%`);
-        frame.toggleAttribute('data-hide-before', pos < 14);
-        frame.toggleAttribute('data-hide-after', pos > 86);
+    // Gallery on phones and tablets: a swipeable strip. The photo in the middle is sharp and its neighbours blur
+    // and shrink in step with the finger; tapping a blurred photo brings it to the middle; the dots show where you are.
+    document.querySelectorAll('.focus-grid').forEach((strip) => {
+      const cards = [...strip.querySelectorAll('.focus-card')];
+      const dotsBox = strip.parentElement.querySelector('.focus-dots');
+      const mq = window.matchMedia('(max-width: 1023px)');
+      let current = -1, frame = 0;
+      const centre = (i) => {
+        const card = cards[i];
+        strip.scrollTo({ left: card.offsetLeft - (strip.clientWidth - card.offsetWidth) / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
       };
-      fig.baSetPos = setPos;
-      const posFrom = (e) => { const r = frame.getBoundingClientRect(); return ((e.clientX - r.left) / r.width) * 100; };
-      let drag = null;
-      frame.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0) return;
-        fig.dataset.touched = 'true';
-        drag = { id: e.pointerId, x: e.clientX, moved: false, touch: e.pointerType !== 'mouse' };
-        // Mouse drags right away. A finger only drags once it moves sideways, so vertical swipes still scroll the page.
-        if (!drag.touch) { drag.moved = true; frame.setPointerCapture(e.pointerId); frame.classList.add('is-dragging'); setPos(posFrom(e)); }
+      const dots = cards.map((card, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'focus-dot';
+        dot.setAttribute('aria-label', `Φωτογραφία ${i + 1} από ${cards.length}: ${card.querySelector('figcaption').textContent}`);
+        dot.addEventListener('click', () => centre(i));
+        dotsBox.append(dot);
+        return dot;
       });
-      frame.addEventListener('pointermove', (e) => {
-        if (!drag || e.pointerId !== drag.id) return;
-        if (!drag.moved) {
-          if (Math.abs(e.clientX - drag.x) < 6) return;
-          drag.moved = true; frame.setPointerCapture(e.pointerId); frame.classList.add('is-dragging');
+      const update = () => {
+        frame = 0;
+        if (!mq.matches) return;
+        const box = strip.getBoundingClientRect();
+        const middle = box.left + box.width / 2;
+        let best = 0, bestDistance = Infinity;
+        cards.forEach((card, i) => {
+          const r = card.getBoundingClientRect();
+          const d = Math.min(1, Math.abs(r.left + r.width / 2 - middle) / (r.width + 14));
+          card.style.setProperty('--d', d.toFixed(3));
+          if (d < bestDistance) { bestDistance = d; best = i; }
+        });
+        if (best !== current) {
+          current = best;
+          dots.forEach((dot, i) => dot.setAttribute('aria-current', String(i === best)));
         }
-        setPos(posFrom(e));
-      });
-      const endDrag = (e) => {
-        if (!drag || e.pointerId !== drag.id) return;
-        if (e.type === 'pointerup' && !drag.moved) setPos(posFrom(e)); // a tap jumps to that spot
-        drag = null;
-        frame.classList.remove('is-dragging');
       };
-      frame.addEventListener('pointerup', endDrag);
-      frame.addEventListener('pointercancel', endDrag);
-      frame.addEventListener('dragstart', (e) => e.preventDefault());
-      range.addEventListener('input', () => { fig.dataset.touched = 'true'; setPos(+range.value); });
-      // Arrow keys move 5% (the native 1% is too slow); Page Up/Down 20%; Home/End go to the edges
-      const keySteps = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5, PageDown: -20, PageUp: 20 };
-      range.addEventListener('keydown', (e) => {
+      const queue = () => { if (!frame) frame = requestAnimationFrame(update); };
+      strip.addEventListener('scroll', queue, { passive: true });
+      window.addEventListener('resize', queue);
+      cards.forEach((card, i) => card.addEventListener('click', () => { if (mq.matches && i !== current) centre(i); }));
+      const setMode = () => {
+        if (mq.matches) {
+          strip.setAttribute('role', 'region');
+          strip.tabIndex = 0;
+          queue();
+        } else {
+          strip.removeAttribute('role');
+          strip.removeAttribute('tabindex');
+          cards.forEach((card) => card.style.removeProperty('--d'));
+        }
+      };
+      mq.addEventListener('change', setMode);
+      setMode();
+    });
+
+    // Process: one job step by step (port of the 21st.dev "Index List Carousel").
+    // Hover, click or arrow keys pick a step; on a phone, tap or swipe the photo for the next or previous one.
+    // The first time it is on screen it plays through once and stops on the finished door. It holds while the
+    // mouse or keyboard is on the list, a deliberate pick stops it, the button pauses and restarts it, and it
+    // never starts by itself for reduced motion. The progress bars' CSS animation is the clock.
+    document.querySelectorAll('.steps').forEach((root) => {
+      const tabs = [...root.querySelectorAll('.step-row')];
+      const slides = [...root.querySelectorAll('.step-slide')];
+      const bars = [...root.querySelectorAll('.steps-bar')];
+      const list = root.querySelector('.steps-list');
+      const pane = root.querySelector('.steps-pane');
+      const caption = root.querySelector('.steps-caption');
+      const count = root.querySelector('.steps-count');
+      const text = root.querySelector('.steps-caption-text');
+      const toggle = root.querySelector('.steps-toggle');
+      const n = slides.length;
+      root.style.setProperty('--interval', (+root.dataset.interval || 3500) + 'ms');
+      let active = 0, previous = -1, playing = false, started = false, stopped = reduceMotion;
+      let inView = false, hovering = false, focused = false;
+
+      const layerOf = (i) => (i === active ? 'on' : i === previous ? 'was' : i > active ? 'after' : 'before');
+      const render = () => {
+        slides.forEach((slide, i) => { slide.dataset.l = layerOf(i); });
+        tabs.forEach((tab, i) => {
+          tab.setAttribute('aria-selected', String(i === active));
+          tab.tabIndex = i === active ? 0 : -1;
+        });
+        bars.forEach((bar, i) => { bar.dataset.s = i < active ? 'done' : i === active ? 'now' : 'next'; });
+        pane.setAttribute('aria-labelledby', tabs[active].id);
+        count.textContent = `Βήμα ${active + 1} από ${n}`;
+        text.textContent = tabs[active].dataset.caption;
+        caption.classList.remove('is-new');
+        void caption.offsetWidth;
+        caption.classList.add('is-new');
+      };
+      const hold = () => root.toggleAttribute('data-held', !inView || hovering || focused || document.hidden);
+      const setPlaying = (on) => {
+        playing = on;
+        root.toggleAttribute('data-playing', on);
+        toggle.dataset.state = on ? 'playing' : 'paused';
+        toggle.setAttribute('aria-label', on ? 'Παύση της αυτόματης προβολής' : 'Αυτόματη προβολή των βημάτων');
+      };
+      const select = (i, deliberate) => {
+        i = ((i % n) + n) % n;
+        if (deliberate) { stopped = true; if (playing) setPlaying(false); }
+        if (i === active) return;
+        previous = active;
+        active = i;
+        render();
+      };
+
+      root.addEventListener('animationend', (e) => {
+        if (e.animationName !== 'steps-fill' || !playing) return;
+        if (active >= n - 1) { setPlaying(false); return; }
+        select(active + 1, false);
+      });
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') select(i, false); });
+        tab.addEventListener('click', () => select(i, true));
+      });
+      list.addEventListener('keydown', (e) => {
+        const moves = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
         let next = null;
-        if (e.key in keySteps) next = +range.value + keySteps[e.key];
+        if (e.key in moves) next = active + moves[e.key];
         else if (e.key === 'Home') next = 0;
-        else if (e.key === 'End') next = 100;
+        else if (e.key === 'End') next = n - 1;
         if (next === null) return;
         e.preventDefault();
-        fig.dataset.touched = 'true';
-        setPos(next);
+        select(next, true);
+        tabs[active].focus();
       });
-      setPos(50);
-    });
+      list.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; hold(); } });
+      list.addEventListener('pointerleave', () => { hovering = false; hold(); });
+      list.addEventListener('focusin', () => { focused = true; hold(); });
+      list.addEventListener('focusout', () => { focused = false; hold(); });
+      document.addEventListener('visibilitychange', hold);
 
-    // Several pairs: show one at a time, with a button per job
-    document.querySelectorAll('.ba-set').forEach((set) => {
-      const figs = [...set.querySelectorAll('.ba')];
-      const switcher = set.closest('section').querySelector('.ba-switch');
-      figs.forEach((fig, i) => { fig.hidden = i > 0; });
-      if (figs.length > 1 && switcher) {
-        figs.forEach((fig, i) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.textContent = fig.dataset.title;
-          button.setAttribute('aria-pressed', String(i === 0));
-          button.addEventListener('click', () => {
-            figs.forEach((f, j) => { f.hidden = j !== i; });
-            switcher.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
-            fig.classList.remove('is-entering'); void fig.offsetWidth; fig.classList.add('is-entering');
-          });
-          switcher.append(button);
-        });
-        switcher.hidden = false;
+      // Touch: a tap on the right two thirds of the photo goes forward, on the left third back; a sideways swipe too
+      let down = null;
+      pane.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' || e.target.closest('.steps-toggle')) return;
+        down = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      });
+      pane.addEventListener('pointerup', (e) => {
+        if (!down || e.pointerId !== down.id) return;
+        const dx = e.clientX - down.x, dy = e.clientY - down.y;
+        down = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) { select(active + (dx < 0 ? 1 : -1), true); return; }
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+          const box = pane.getBoundingClientRect();
+          select(active + (e.clientX - box.left < box.width / 3 ? -1 : 1), true);
+        }
+      });
+      pane.addEventListener('pointercancel', () => { down = null; });
+
+      toggle.addEventListener('click', () => {
+        if (playing) { stopped = true; setPlaying(false); return; }
+        stopped = false;
+        if (active >= n - 1) select(0, false);
+        setPlaying(true);
+        hold();
+      });
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([entry]) => {
+          inView = entry.isIntersecting;
+          if (inView && !started && !stopped) { started = true; setPlaying(true); }
+          hold();
+        }, { threshold: 0.5 }).observe(pane);
       }
-      // One gentle nudge the first time the slider is on screen, so it is obvious it moves
-      const first = figs[0];
-      if (!first || reduceMotion || !('IntersectionObserver' in window)) return;
-      const io = new IntersectionObserver(([entry]) => {
-        if (!entry.isIntersecting) return;
-        io.disconnect();
-        setTimeout(() => {
-          const start = performance.now(), duration = 1500;
-          const step = (now) => {
-            if (first.dataset.touched) return;
-            const t = Math.min(1, (now - start) / duration);
-            const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-            first.baSetPos(50 - 12 * Math.sin(eased * Math.PI * 2));
-            if (t < 1) requestAnimationFrame(step);
-          };
-          requestAnimationFrame(step);
-        }, 400);
-      }, { threshold: 0.6 });
-      io.observe(first.querySelector('.ba-frame'));
     });
 
-    // Numbers band: the four figures rise in once when the band reaches the screen (skipped for reduced motion).
-    // The hidden starting state is added here, so without JS the numbers are simply visible.
-    document.querySelectorAll('.stats').forEach((stats) => {
-      if (reduceMotion || !('IntersectionObserver' in window)) return;
-      stats.classList.add('will-reveal');
+    // Hero numbers count up from 0 the first time they are on screen. With reduced motion, or without JS,
+    // they simply show their final value.
+    document.querySelectorAll('.hero-stats').forEach((stats) => {
+      const nums = [...stats.querySelectorAll('[data-count]')];
+      if (reduceMotion || !('IntersectionObserver' in window) || !nums.length) return;
+      const show = (el, value) => {
+        const decimals = +(el.dataset.decimals || 0);
+        el.textContent = decimals ? value.toFixed(decimals).replace('.', ',') : String(Math.round(value));
+      };
+      nums.forEach((el) => show(el, 0));
       const io = new IntersectionObserver(([entry]) => {
         if (!entry.isIntersecting) return;
-        stats.classList.add('is-in');
         io.disconnect();
-      }, { threshold: 0.35 });
+        const wait = performance.now() < 1200 ? 520 : 0; // on load, let the hero's entrance finish first
+        nums.forEach((el, i) => {
+          const target = parseFloat(el.dataset.count);
+          setTimeout(() => {
+            const start = performance.now(), duration = 1600;
+            const step = (now) => {
+              const t = Math.min(1, (now - start) / duration);
+              show(el, target * (1 - Math.pow(1 - t, 3)));
+              if (t < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          }, wait + i * 130);
+        });
+      }, { threshold: 0.6, rootMargin: '0px 0px -90px 0px' });
       io.observe(stats);
     });
   </script>

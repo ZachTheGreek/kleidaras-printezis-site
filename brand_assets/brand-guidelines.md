@@ -46,6 +46,8 @@ The identity comes from the shop itself: the burgundy wall, the brass cylinders,
 | `--white` | Λευκό | `#FFFFFF` | Elevated surfaces (cards, header on scroll) |
 | `--line` | Γραμμή | `#CDD3D4` | Borders, dividers |
 
+**Third-party colour, one exception:** review stars use Google's star yellow `#FBBC04`, so they read as Google's rating. Nowhere else.
+
 **Proportion:** about 70% nickel/white, 20% ink, 8% burgundy, 2% brass. Burgundy is for actions and moments, not for backgrounds everywhere. The one exception is the deep burgundy used for the dark sections.
 
 ### Contrast (WCAG 2.1, checked)
@@ -129,20 +131,23 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
   - While it's open, the page behind it is `inert`.
   - Above 1280px there is no panel; the header carries the nav and the phone button. The call bar exists only below 1024px, and between 1024 and 1279 the header shows the phone button plus «Μενού». Never show the phone button in the header and in the call bar at the same time.
 - **Logo:** both logos (header and footer) link to `#top`, and **no element may have `id="top"`**, so the browser scrolls to the very top. An id on the sticky header made the logo scroll only 88px.
-- **Before/after slider** (`#prin-meta`):
-  - **Pairs:** one `<figure class="ba">` per job. With 2+ pairs, JS shows one at a time and builds a button per job from `data-title`.
-  - **Input:** a mouse drags right away. A finger only drags once it moves sideways, so vertical swipes still scroll the page. A tap jumps to that spot. Arrow keys move 5%, PgUp/PgDn 20%, Home/End go to the edges, through a hidden `<input type="range">`.
-  - **Motion:** everything that moves uses `transform`. There's one 1.5s nudge the first time it's on screen, skipped under reduced motion.
-  - **Frame:** 4:5 on mobile, square on desktop, so portrait phone photos survive both.
-  - **Before launch:** the images are placehold.co placeholders, and the real pairs and captions must replace them.
-- **Gallery** (`#douleies`, a port of the 21st.dev «Focus Cards» component):
-  - **Not React:** ported to plain HTML/CSS, with real photos instead of the Unsplash images the prompt asked for.
-  - **Hover (mouse only):** the other cards shrink to 0.98 and swap to a pre-blurred copy by opacity. The original animated `filter: blur` with `transition-all`, which our rules forbid.
-  - **Captions:** always visible, because touch screens have no hover. Keep them to 2–3 words; the full description goes in `alt`.
-- **Numbers band** (dark, between «Πριν και μετά» and the family):
-  - **Content:** 35 χρόνια στο επάγγελμα · 2 γενιές κλειδαράδων · 4,8★ βαθμολογία στο Google · 74 κριτικές πελατών. Only verifiable facts, no «1000+ πελάτες».
-  - **Motion:** the items rise in once when the band reaches the screen. The JS adds the hidden starting state, so the numbers show without JS and under reduced motion.
-  - **Duplicates:** the review count also appears in the hero, the reviews section and the JSON-LD, so update all of them together.
+- **Hero numbers:** 35 χρόνια στο επάγγελμα · 2 γενιές κλειδαράδων · 4,8★ βαθμολογία στο Google · 74 κριτικές στο Google, under the hero buttons (4 across from 640px, 2×2 on phones).
+  - **Motion:** they count up from 0 the first time they are on screen. On phones they wait until they clear the call bar. The final values are in the HTML, so they show as-is without JS and under reduced motion.
+  - **Content:** only verifiable facts, no «1000+ πελάτες». 74 also appears in the reviews section and the JSON-LD, so update them together.
+- **Gallery** (`#douleies`, a port of the 21st.dev «Focus Cards» component, in plain HTML/CSS with real photos instead of Unsplash):
+  - **From 1024px with a mouse:** hovering a photo shrinks the others to 0.98 and swaps them to a blurred copy by opacity. The original animated `filter: blur` with `transition-all`, which our rules forbid.
+  - **Below 1024px:** a swipeable strip, one photo in the middle (76vw on phones, 44vw on tablets). The neighbours blur and shrink in step with the finger (`--d` set from the scroll position). Tapping a blurred photo brings it to the middle, and dots under the strip show the position and jump to a photo.
+  - **Blurred copies:** tiny pre-blurred 180×240 JPEGs in `assets/images/blur/` (2–3 KB each). There's no CSS filter at runtime.
+  - **Captions:** always visible. Keep them to 2–3 words; the full description goes in `alt`.
+- **Process** (`#diadikasia`, a port of the 21st.dev «Index List Carousel»): one real job, a wooden door, in 8 steps. The top step is the start and the bottom step is the finished door.
+  - **Layout:** the numbered steps (a vertical `tablist`) sit beside one photo (`tabpanel`). On phones the photo comes first and the steps below it. On tablets it's the same stack in a 600px column.
+  - **Picking a step:** mouse hover, click, or arrow keys/Home/End. On touch, tap the right two thirds of the photo for the next step and the left third for the previous, or swipe sideways. Vertical swipes still scroll the page.
+  - **Motion:** the new photo wipes in from the right going down the list and from the left going back up. It's a mask of two opposite `translate`s, so only transform and opacity animate.
+  - **Autoplay:** it plays through once, 3.5s per step, the first time it is half on screen, and stops on the finished door. The story bars on top are the clock (a CSS animation). It holds while the mouse or keyboard is on the list, a deliberate pick stops it, and the button pauses or restarts it (WCAG 2.2.2). It never starts by itself under reduced motion.
+  - **Privacy:** the client's door sign is blurred in steps 6 and 8. Blur any client name, sign or address before adding a photo.
+- **Reviews** (`#kritikes`): laid out like Google Maps: a rating summary (4,8 ★★★★★ · 74 κριτικές), then white review cards with an initial avatar, name, «Κριτική στο Google», 5 stars and the text.
+  - **Stars:** only show 5 stars on a review that is 5/5 on Google. Both current ones were checked on 2026-10-10. The summary shows 5 full stars for 4,8, as Google does.
+  - **Text:** quote the reviews faithfully. A cut-off review ends with «…».
 - **Header nav:** 6 links fit only from 1280px; below that the header shows «Μενού».
 - **FAQ** (`#erotiseis`):
   - **Markup:** native `<details>`, so it works without JS. The answer fades in, and the + rotates into ×.
@@ -163,6 +168,7 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
 ## 8. Photography
 - **Real photos only**, from `~/Desktop/Locksmith Project/photos/`. No stock and no AI-generated people.
 - **Prefer:** the family at work, hands on locks, the key wall, the shop interior.
+- **Balance (decided 2026-10-11):** about 15 photos plus 1 video on desktop. On phones the services photo and the shop interior are hidden. The gallery and the process show one photo at a time on phones. Each photo appears in one place only.
 - **Exclude:**
   - the Duolingo screenshot
   - duplicates
@@ -178,10 +184,11 @@ Spend the visual boldness in **one** place. The bitting profile of the logo's ke
   | Card: armored doors | `thorakismeni-porta.jpg` | son at an armored door |
   | Card: locks & cylinders | `assets/video/exypni-kleidaria.mp4` | smart lock turning by itself (video V10) |
   | Card: cars & motorbikes | `kleidi-michanis.jpg` | motorbike ignition |
-  | Services list | `sygkollisi-eisodos.jpg` | father welding an iron building entrance |
+  | Services list (desktop only) | `sygkollisi-eisodos.jpg` | father welding an iron building entrance; hidden below 1024px, where the gallery follows right after |
   | Family | `oikogeneia-toixos-kleidia.jpg` + `topothetisi-kleidarias.jpg` | together they show all three people |
-  | Shop | `magazi-prosopsi.jpg` + `magazi-toixos-kleidion.jpg` | entrance + key wall |
-  | Gallery «Από τη δουλειά μας» (6) | `douleia-*.jpg` (900×1200) | gate, electronic lock, door closer, remote repair, gate electric lock, wooden-door lock |
+  | Shop | `magazi-prosopsi.jpg` + `magazi-toixos-kleidion.jpg` | entrance + key wall; the key wall is hidden below 640px (it is already in the family photo) |
+  | Gallery «Από τη δουλειά μας» (6) | `douleia-*.jpg` (900×1200) | gate, electronic lock, new cylinder, remote repair, gate electric lock, wooden-door lock: 3 with people, 3 objects |
+  | Process «Μια πόρτα, βήμα βήμα» (8) | `diadikasia-1…8-*.jpg` (900×1200) | photos #17, #37, #10, #26, #45, #51, #42, #21 of one wooden-door job |
 
 ### Video
 - At most **one** looping video per page. It's muted with **no audio track** in the file, has a poster frame and `playsinline`, and is H.264 MP4 with faststart, kept under about 600 KB.
